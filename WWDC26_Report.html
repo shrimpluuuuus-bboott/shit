@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WWDC26 发布会多品调研报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#fff;--card-bg:#f5f5f7;--text:#1d1d1f;--text-secondary:#86868b;--border:#d2d2d7;--line:#e8e8ea;--accent:#0071e3;--brand:#0071e3;--up:#1f6b43;--up-bg:#e7f1ea;--down:#9a4f2e;--down-bg:#f5e7e0;--flat:#6b6b70;--flat-bg:#eeeeef;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Helvetica Neue,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;font-size:14px;-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:0 auto;padding:24px 20px}
+header{margin-bottom:24px}
+header h1{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+header .subtitle{font-size:13px;color:var(--text-secondary)}
+.tabs{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line);display:flex;padding:0 22px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:13px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--text-secondary);border-bottom:2.5px solid transparent;white-space:nowrap}
+.tab.active{color:var(--text);border-bottom-color:var(--brand);font-weight:600}
+.pane{display:none}.pane.active{display:block}
+.section{margin-bottom:28px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hero-card{background:var(--card-bg);border-radius:12px;padding:20px}
+.hero-card .tag{font-size:11px;font-weight:600;color:var(--brand);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.hero-card h3{font-size:16px;font-weight:600;margin-bottom:4px}
+.hero-card p{font-size:13px;color:var(--text-secondary)}
+.rating{display:inline-flex;align-items:center;gap:4px;font-size:20px;font-weight:700;color:var(--brand)}
+.rating span{font-size:12px;font-weight:400;color:var(--text-secondary);margin-left:4px}
+.rated{position:relative;cursor:help;border-bottom:1px dotted var(--border);display:inline-block;max-width:100%}
+.rated .tip{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(4px);width:240px;white-space:normal;word-break:break-all;background:#1d1d1f;color:#fff;font-size:12px;line-height:1.55;text-align:left;padding:10px 12px;border-radius:9px;opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease;z-index:9999;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.22);font-weight:400;letter-spacing:0}
+.rated .tip b{color:#ffd9a8;font-weight:600}
+.rated .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1d1d1f}
+.rated:hover .tip,.rated:focus .tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.delta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.delta .ico{font-size:10px;line-height:1}
+.delta.up{color:var(--up);background:var(--up-bg)}
+.delta.down{color:var(--down);background:var(--down-bg)}
+.delta.flat{color:var(--flat);background:var(--flat-bg)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;background:var(--card-bg)}
+tr:hover{background:#fafafa}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--card-bg);border-radius:12px;padding:16px;text-align:center}
+.kpi .num{font-size:24px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+.kpi .desc{font-size:11px;color:var(--text-secondary);margin-top:3px}
+.hl-card{background:var(--card-bg);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+.hl-card .rank{font-size:24px;font-weight:700;color:var(--brand);margin-bottom:6px}
+.eco-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.eco-card .pair{font-weight:600;font-size:13px;margin-bottom:5px}
+.eco-card .feat li{font-size:12.5px;color:var(--text-secondary);list-style:none;padding:2px 0 2px 12px;position:relative}
+.eco-card .feat li::before{content:'◆';position:absolute;left:0;font-size:8px;color:var(--brand);top:5px}
+.ai-card{background:linear-gradient(135deg,#f0f4ff 0%,#e8f0ff 100%);border:1px solid #c7d9ff;border-radius:12px;padding:16px;margin-bottom:12px}
+.ai-card h4{font-size:14px;font-weight:600;color:var(--brand);margin-bottom:8px}
+.ai-card p{font-size:12.5px;color:var(--text-secondary)}
+.judge{font-size:12px;color:var(--text-secondary);margin-top:6px;font-style:italic}
+.chart-wrap{background:var(--card-bg);border-radius:12px;padding:16px;margin:16px 0}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swot{background:var(--card-bg);border-radius:12px;padding:14px}
+.swot h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.swot.s{background:#e7f1ea}
+.swot.w{background:#f5e7e0}
+.swot.o{background:#e7f0f5}
+.swot.t{background:#f0ede7}
+.swot li{font-size:12px;margin-bottom:4px;padding-left:10px;position:relative}
+.swot li::before{content:'•';position:absolute;left:0}
+details{margin-top:12px}
+details summary{cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);padding:8px 0}
+details[open] summary{border-bottom:1px solid var(--line);margin-bottom:8px}
+.nav-btns{display:flex;justify-content:space-between;padding:20px 0;border-top:1px solid var(--line);margin-top:24px}
+.nav-btn{background:var(--card-bg);border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:background .15s}
+.nav-btn:hover{background:#e8e8ea}
+.nav-btn:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:768px){.hero-grid{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.swot-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>WWDC26 发布会多品调研报告</h1>
+<div class="subtitle">苹果全球开发者大会 · 2026年6月9日 · 软件系统全面升级</div>
+</header>
+<nav class="tabs">
+<button class="tab active" data-tab="0">📋 总览</button>
+<button class="tab" data-tab="1">📱 iOS 27</button>
+<button class="tab" data-tab="2">💻 iPadOS 27</button>
+<button class="tab" data-tab="3">🖥 macOS 27</button>
+<button class="tab" data-tab="4">⌚ watchOS 27</button>
+<button class="tab" data-tab="5">👁 visionOS 27</button>
+<button class="tab" data-tab="6">🔧 Xcode 27</button>
+<button class="tab" data-tab="7">🧩 Swift 27</button>
+</nav>
+
+<div id="pane0" class="pane active">
+<div class="section">
+<div class="section-title">今日最大看点</div>
+<div class="hl-card">
+<div class="rank">1</div>
+<h3>Siri AI 全面升级</h3>
+<p>全新对话式 AI 助手，支持自然语言多轮对话、个人上下文理解、应用内操作执行，并新增独立 Siri App，跨设备无缝衔接。</p>
+<div class="judge">影响：Siri 从语音助手进化为真正的 AI 助理，与 ChatGPT/Gemini 正面竞争</div>
+</div>
+<div class="hl-card">
+<div class="rank">2</div>
+<h3>Apple Intelligence 全面增强</h3>
+<p>下一代 AI 能力覆盖 Photos、Messages、Safari、Passwords 等核心应用，新增 Spatial Reframing、Image Playground、Write with Siri 等功能。</p>
+<div class="judge">影响：AI 能力从 iPhone 扩展到全平台，生态粘性进一步增强</div>
+</div>
+<div class="hl-card">
+<div class="rank">3</div>
+<h3>Liquid Glass 设计语言统一</h3>
+<p>全新 Liquid Glass 设计语言横跨 iOS/macOS/watchOS/visionOS，可自定义透明度的毛玻璃效果，更统一的视觉体验。</p>
+<div class="judge">影响：苹果设计语言进入新阶段，跨设备体验一致性大幅提升</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">新品价格总表</div>
+<table>
+<thead><tr><th>产品</th><th>品类</th><th>版本</th><th>定位</th></tr></thead>
+<tbody>
+<tr><td>iOS 27</td><td>操作系统</td><td>精简版</td><td>iPhone 系统升级，免费推送</td></tr>
+<tr><td>iPadOS 27</td><td>操作系统</td><td>精简版</td><td>iPad 系统升级，免费推送</td></tr>
+<tr><td>macOS 27 (Golden Gate)</td><td>操作系统</td><td>精简版</td><td>Mac 系统升级，免费推送</td></tr>
+<tr><td>watchOS 27</td><td>操作系统</td><td>精简版</td><td>Apple Watch 系统升级，免费推送</td></tr>
+<tr><td>visionOS 27</td><td>操作系统</td><td>精简版</td><td>Apple Vision Pro 系统升级，免费推送</td></tr>
+<tr><td>Xcode 27</td><td>开发工具</td><td>精简版</td><td>含 AI Agent 编程助手</td></tr>
+<tr><td>Swift 27 / SwiftUI 27</td><td>编程语言</td><td>精简版</td><td>Core AI 框架集成</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">生态联动矩阵</div>
+<div class="eco-card">
+<div class="pair">Siri App 跨设备同步</div>
+<ul class="feat">
+<li>iPhone 问的问题，可在 iPad/Mac/Apple Watch 继续对话</li>
+<li>对话历史统一管理，支持置顶</li>
+</ul>
+</div>
+<div class="eco-card">
+<div class="pair">Apple Intelligence 全平台统一</div>
+<ul class="feat">
+<li>iOS/iPadOS/macOS/watchOS/visionOS 共享同一 AI 能力层</li>
+<li>照片 AI 编辑、Image Playground、Clean Up 等功能跨平台一致</li>
+</ul>
+</div>
+<div class="eco-card">
+<div class="pair">Visual Intelligence 生态联动</div>
+<ul class="feat">
+<li>iPhone 相机取景 → Siri 识别物体/文字/营养信息</li>
+<li>Mac 截屏 → Siri 分析屏幕内容</li>
+<li>Apple Vision Pro → 目光注视 + Siri 理解你所见</li>
+</ul>
+</div>
+<div class="eco-card">
+<div class="pair">Home + AI 智能家居</div>
+<ul class="feat">
+<li>HomeKit Secure Video 4K 录制 + AI 描述录像内容</li>
+<li>iPhone/iPad 自然语言搜索 HomeKit 录像片段</li>
+</ul>
+</div>
+<div class="eco-card">
+<div class="pair">Child Safety 家长控制</div>
+<ul class="feat">
+<li>Ask to Browse / Time Allowances / Schedules 跨设备同步</li>
+<li>家长在 iPhone/Mac 审批孩子的网站请求</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">本场核心数字</div>
+<div class="kpi-row">
+<div class="kpi"><div class="num">6</div><div class="desc">操作系统同步升级</div></div>
+<div class="kpi"><div class="num">Siri AI</div><div class="desc">全新对话式 AI 助手</div></div>
+<div class="kpi"><div class="num">70%</div><div class="desc">新照片加载速度提升</div></div>
+<div class="kpi"><div class="num">30%</div><div class="desc">App 启动速度提升</div></div>
+</div>
+</div>
+</div>
+
+<div id="pane1" class="pane">
+<div class="section">
+<div class="section-title">iOS 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">操作系统</div>
+<h3>iOS 27</h3>
+<p>iPhone 系统 · 2026年秋季推送</p>
+<div class="rating">★★★★☆ <span>AI 能力大幅进化</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Siri AI + Apple Intelligence</h3>
+<p>全新对话式 AI、个人上下文理解、应用内操作、Camera 视觉搜索</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Siri AI</td><td><span class="delta up">▲ 新增</span></td><td>从语音助手升级为真正 AI 助理，竞争力大幅提升</td></tr>
+<tr><td>独立 Siri App</td><td><span class="delta up">▲ 新增</span></td><td>对话历史统一管理，跨设备无缝衔接</td></tr>
+<tr><td>Spatial Reframing</td><td><span class="delta up">▲ 新增</span></td><td>AI 照片扩展构图，实用性强</td></tr>
+<tr><td>Clean Up 增强</td><td><span class="delta up">▲ 新增</span></td><td>可移除更大物体，实用性提升</td></tr>
+<tr><td>Camera Visual Intelligence</td><td><span class="delta up">▲ 新增</span></td><td>相机取景实时 AI 识别，创新体验</td></tr>
+<tr><td>App 启动速度</td><td><span class="delta up">▲ 30%</span></td><td>日常体验明显提升</td></tr>
+<tr><td>AirDrop 传输</td><td><span class="delta up">▲ 80%</span></td><td>文件分享体验大幅改善</td></tr>
+<tr><td>Photos 新照片加载</td><td><span class="delta up">▲ 70%</span></td><td>大型照片库体验显著提升</td></tr>
+<tr><td>Liquid Glass 设计</td><td><span class="delta up">▲ 升级</span></td><td>视觉一致性增强，可自定义透明度</td></tr>
+<tr><td>Child Safety 扩展</td><td><span class="delta up">▲ 升级</span></td><td>覆盖暴力/血腥内容，家长控制更全面</td></tr>
+<tr><td>GymKit on iPhone</td><td><span class="delta up">▲ 新增</span></td><td>与健身房设备直连，健身生态扩展</td></tr>
+<tr><td>Perimenopause 支持</td><td><span class="delta up">▲ 新增</span></td><td>40+ 女性健康关怀，用户群体扩展</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>Siri AI 终于具备真正的对话和推理能力，与 Google Gemini / Samsung Galaxy AI 正面竞争；性能大幅优化（App 启动+30%，AirDrop+80%）；健康功能扩展至更年期支持，用户群体扩展。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>Siri AI 首发仅支持英语，EU 地区暂不支持；部分 AI 功能需 A17 Pro/M1 及以上芯片；GymKit 需 AirPods Pro 3 配合。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>iPhone 15 Pro 及以上用户可获得完整 AI 体验；注重隐私的 AI 助手用户；健身爱好者（GymKit）；40+ 女性用户（健康功能）。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>相比 Android 阵营（Google Gemini Live、Samsung Galaxy AI），苹果 AI 功能覆盖面已接近，但 Siri AI 语言支持进度较慢，EU 暂缺可能影响欧洲市场份额。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>全平台统一 AI 能力，生态协同强</li><li>隐私保护：设备端 AI 处理</li><li>性能优化显著（30%/70%/80%）</li><li>Child Safety 功能全面</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>Siri AI 首发仅英语，EU 暂不支持</li><li>部分功能需高端芯片，入门机型受限</li><li>GymKit 需 AirPods Pro 3</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>AI 助手竞争格局重塑</li><li>健康功能扩展至新用户群</li><li>开发者工具升级吸引更多 App</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>Google Gemini / Samsung AI 先行优势</li><li>AI 功能差异化缩小</li><li>EU 监管可能限制 AI 功能</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>iOS 27</th><th>iOS 26（参考）</th></tr></thead>
+<tbody>
+<tr><td>AI 助手</td><td>Siri AI（对话式）</td><td>Siri（传统语音）</td></tr>
+<tr><td>照片 AI 编辑</td><td>Spatial Reframing + Extend + Clean Up 增强</td><td>Clean Up 基础版</td></tr>
+<tr><td>性能优化</td><td>App 启动 +30%，Photos +70%，AirDrop +80%</td><td>基准</td></tr>
+<tr><td>设计语言</td><td>Liquid Glass（可自定义透明度）</td><td>Liquid Glass 基础版</td></tr>
+<tr><td>健康功能</td><td>Perimenopause 支持 + GymKit</td><td>Cycle Tracking 基础版</td></tr>
+<tr><td>家长控制</td><td>Ask to Browse + Time Allowances + Schedules</td><td>Screen Time</td></tr>
+<tr><td>网络切换</td><td>智能 Wi-Fi/蜂窝无缝切换</td><td>基础切换</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" disabled>← 总览</button>
+<button class="nav-btn" onclick="switchTab(2)">iPadOS 27 →</button>
+</div>
+</div>
+
+<div id="pane2" class="pane">
+<div class="section">
+<div class="section-title">iPadOS 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">操作系统</div>
+<h3>iPadOS 27</h3>
+<p>iPad 系统 · 2026年秋季推送</p>
+<div class="rating">★★★★☆ <span>Apple Pencil + AI 深度结合</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Notes 手写 AI + Visual Intelligence</h3>
+<p>Apple Pencil 圈选 → Siri AI 分析；手写笔记 → AI 整理为学习指南</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Siri AI</td><td><span class="delta up">▲ 新增</span></td><td>与 iPhone 一致的 AI 助理体验</td></tr>
+<tr><td>Notes 手写 AI</td><td><span class="delta up">▲ 新增</span></td><td>手写笔记自动整理为格式化内容，学术场景强</td></tr>
+<tr><td>Visual Intelligence 截屏</td><td><span class="delta up">▲ 新增</span></td><td>Apple Pencil 圈选区域 → Siri 识别分析</td></tr>
+<tr><td>外部存储传输</td><td><span class="delta up">▲ 5x</span></td><td>文件管理效率大幅提升</td></tr>
+<tr><td>Messages 同步</td><td><span class="delta up">▲ 升级</span></td><td>未读通知同步更快更可靠</td></tr>
+<tr><td>Liquid Glass</td><td><span class="delta up">▲ 升级</span></td><td>跨 iPhone/iPad 视觉一致</td></tr>
+<tr><td>Shortcuts AI</td><td><span class="delta up">▲ 新增</span></td><td>自然语言创建自动化，实用性强</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>iPad 独占 Apple Pencil + AI 深度结合，手写笔记 AI 整理是独特场景；外部存储传输速度提升 5 倍，对专业用户吸引力大。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>AI 功能与 iOS 27 基本一致，差异化较小；部分功能需 M1 及以上 iPad。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>学生（手写笔记 AI 整理）；创意专业人士（Apple Pencil + AI）；需要高效文件管理的用户。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>手写笔记 AI 整理是独特优势，Android 平板暂无对标功能；与 Samsung Galaxy Tab S 系列相比，AI 生态整合更深。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>Apple Pencil + AI 深度结合，差异化明显</li><li>外部存储 5x 提速，专业场景友好</li><li>全平台 AI 能力统一</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>与 iOS 功能重叠度高</li><li>部分 AI 功能需高端 iPad</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>教育市场深度渗透</li><li>专业创作场景扩展</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>Samsung Galaxy Tab AI 功能追赶</li><li>Surface Pro AI 集成</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>iPadOS 27</th><th>iPadOS 26（参考）</th></tr></thead>
+<tbody>
+<tr><td>手写 AI</td><td>Notes 手写 → AI 整理/格式化</td><td>无</td></tr>
+<tr><td>Visual Intelligence</td><td>Apple Pencil 圈选分析</td><td>无</td></tr>
+<tr><td>外部存储</td><td>传输速度 5x 提升</td><td>基准</td></tr>
+<tr><td>Messages 同步</td><td>未读通知更快同步</td><td>基础同步</td></tr>
+<tr><td>Shortcuts</td><td>自然语言创建自动化</td><td>手动配置</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(1)">← iOS 27</button>
+<button class="nav-btn" onclick="switchTab(3)">macOS 27 →</button>
+</div>
+</div>
+
+<div id="pane3" class="pane">
+<div class="section">
+<div class="section-title">macOS 27 Golden Gate — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">操作系统</div>
+<h3>macOS 27 "Golden Gate"</h3>
+<p>Mac 系统 · 2026年秋季推送</p>
+<div class="rating">★★★★★ <span>AI 能力最强平台</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Siri AI + Visual Intelligence + Liquid Glass</h3>
+<p>Mac 专属 AI 助理，截屏即分析，Spotlight 集成 Siri</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Siri AI</td><td><span class="delta up">▲ 新增</span></td><td>Mac 最强 AI 助手，Spotlight 集成</td></tr>
+<tr><td>独立 Siri App</td><td><span class="delta up">▲ 新增</span></td><td>对话历史跨设备同步</td></tr>
+<tr><td>Visual Intelligence 截屏</td><td><span class="delta up">▲ 新增</span></td><td>截屏任何内容 → Siri 分析搜索</td></tr>
+<tr><td>Write with Siri</td><td><span class="delta up">▲ 新增</span></td><td>全系统写作辅助，匹配个人风格</td></tr>
+<tr><td>Liquid Glass</td><td><span class="delta up">▲ 升级</span></td><td>Mail 等按钮对比度增强，可自定义</td></tr>
+<tr><td>Ultrawide 5K 120Hz</td><td><span class="delta up">▲ 新增</span></td><td>专业显示器支持增强</td></tr>
+<tr><td>Passwords AI</td><td><span class="delta up">▲ 新增</span></td><td>自动修复弱密码/泄露密码</td></tr>
+<tr><td>Child Safety</td><td><span class="delta up">▲ 升级</span></td><td>家庭管理更全面</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>macOS 是 Apple Intelligence 能力最强的平台（大屏 + 多窗口 + 键盘输入）；Visual Intelligence 截屏分析是 Mac 独特场景；Ultrawide 5K 120Hz 支持对专业用户有吸引力。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>Siri AI 同样首发仅英语；部分 AI 功能需 M3 + 12GB 内存；EU 暂不支持。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>Mac 专业用户（开发者/设计师）；需要 AI 辅助写作的内容创作者；家庭用户（Child Safety）。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>与 Windows Copilot+ PC 相比，苹果 AI 优势在于隐私保护和生态整合；MLX 本地推理框架对开发者有吸引力。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>Apple Intelligence 最强平台（大屏+键盘）</li><li>Visual Intelligence 截屏分析独特场景</li><li>Spotlight 集成 Siri AI</li><li>Ultrawide 专业显示支持</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>Siri AI 语言支持有限</li><li>部分功能硬件门槛较高</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>AI PC 竞争格局</li><li>开发者工具升级（Xcode AI Agent）</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>Windows Copilot+ PC AI 集成</li><li>Linux AI 工具链发展</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>macOS 27</th><th>macOS 26（参考）</th></tr></thead>
+<tbody>
+<tr><td>AI 助手</td><td>Siri AI（对话式）</td><td>Siri（传统语音）</td></tr>
+<tr><td>Visual Intelligence</td><td>截屏即分析</td><td>无</td></tr>
+<tr><td>Write with Siri</td><td>全系统写作辅助</td><td>无</td></tr>
+<tr><td>Ultrawide 支持</td><td>5K @ 120Hz</td><td>较低分辨率</td></tr>
+<tr><td>Passwords</td><td>AI 自动修复弱密码</td><td>手动管理</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(2)">← iPadOS 27</button>
+<button class="nav-btn" onclick="switchTab(4)">watchOS 27 →</button>
+</div>
+</div>
+
+<div id="pane4" class="pane">
+<div class="section">
+<div class="section-title">watchOS 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">操作系统</div>
+<h3>watchOS 27</h3>
+<p>Apple Watch 系统 · 2026年秋季推送</p>
+<div class="rating">★★★★☆ <span>AI + 健身 + 健康全面增强</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Siri AI + Workout Buddy + Tap 手势</h3>
+<p>手腕上的 AI 助理；AI 健身指导；单指手势操作 Smart Stack</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Siri AI</td><td><span class="delta up">▲ 新增</span></td><td>手腕上的 AI 助理，支持自然对话</td></tr>
+<tr><td>独立 Siri App</td><td><span class="delta up">▲ 新增</span></td><td>对话历史跨设备同步</td></tr>
+<tr><td>Workout Buddy</td><td><span class="delta up">▲ 升级</span></td><td>AI 健身指导，跑步/配速/时长洞察</td></tr>
+<tr><td>Tap 手势</td><td><span class="delta up">▲ 新增</span></td><td>单指捏合打开 Smart Stack，单手操作</td></tr>
+<tr><td>Dynamic App Grid</td><td><span class="delta up">▲ 新增</span></td><td>AI 推荐常用 App，Siri App 居中</td></tr>
+<tr><td>室内跑距离</td><td><span class="delta up">▲ 精确</span></td><td>跑步机数据更准确</td></tr>
+<tr><td>Perimenopause 支持</td><td><span class="delta up">▲ 新增</span></td><td>40+ 女性健康关怀</td></tr>
+<tr><td>Child Account</td><td><span class="delta up">▲ 新增</span></td><td>无需 iPhone 即可为孩子设置 Watch</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>Siri AI 首次登陆 Apple Watch，AI 能力补全；Workout Buddy AI 健身指导是独特功能；Tap 手势解决单手操作痛点；Child Account 扩展无 iPhone 儿童用户群。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>Siri AI 需配对 iPhone 15 Pro 及以上；Workout Buddy 需蓝牙耳机；EU 暂不支持。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>健身爱好者（AI 跑步指导）；40+ 女性（健康功能）；希望为孩子配置 Apple Watch 的家长。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>相比 Garmin / Fitbit，苹果 AI 健身指导功能更智能；Child Account 无需 iPhone 是独特优势。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>Siri AI 首次登陆手表</li><li>Workout Buddy AI 健身指导</li><li>Child Account 无需 iPhone</li><li>Tap 手势单手操作</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>Siri AI 需配对高端 iPhone</li><li>EU 暂不支持</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>儿童手表市场</li><li>健身 AI 差异化</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>Garmin AI 健身功能追赶</li><li>Samsung Galaxy Watch AI</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>watchOS 27</th><th>watchOS 10（参考）</th></tr></thead>
+<tbody>
+<tr><td>AI 助手</td><td>Siri AI（对话式）</td><td>Siri（语音命令）</td></tr>
+<tr><td>健身指导</td><td>Workout Buddy AI 洞察</td><td>基础运动记录</td></tr>
+<tr><td>操作手势</td><td>Tap 单指捏合</td><td>双击</td></tr>
+<tr><td>App 布局</td><td>Dynamic App Grid</td><td>固定网格</td></tr>
+<tr><td>儿童支持</td><td>Child Account 无需 iPhone</td><td>需配对 iPhone</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(3)">← macOS 27</button>
+<button class="nav-btn" onclick="switchTab(5)">visionOS 27 →</button>
+</div>
+</div>
+
+<div id="pane5" class="pane">
+<div class="section">
+<div class="section-title">visionOS 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">操作系统</div>
+<h3>visionOS 27</h3>
+<p>Apple Vision Pro 系统 · 2026年秋季推送</p>
+<div class="rating">★★★★★ <span>空间计算 + AI 深度融合</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Siri 目光注视 + 3D 模型预览 + 空间场景</h3>
+<p>注视即识别；Mac 3D 模型空间预览；全景照片 → 空间场景</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Siri AI 目光控制</td><td><span class="delta up">▲ 新增</span></td><td>注视 Siri → 语音对话，交互创新</td></tr>
+<tr><td>Visual Intelligence</td><td><span class="delta up">▲ 新增</span></td><td>注视任何物体 → Siri 识别理解</td></tr>
+<tr><td>3D 模型空间预览</td><td><span class="delta up">▲ 新增</span></td><td>Mac 3D 模型引入空间预览编辑</td></tr>
+<tr><td>全景 → 空间场景</td><td><span class="delta up">▲ 新增</span></td><td>全景照片变沉浸式环境</td></tr>
+<tr><td>Curved Windows</td><td><span class="delta up">▲ 新增</span></td><td>环绕式窗口，沉浸感更强</td></tr>
+<tr><td>Thórsmörk 环境</td><td><span class="delta up">▲ 新增</span></td><td>冰岛极光新环境</td></tr>
+<tr><td>Wi-Fi 连接速度</td><td><span class="delta up">▲ 3x</span></td><td>戴上即连，体验提升</td></tr>
+<tr><td>Dwell Control 眼控</td><td><span class="delta up">▲ 升级</span></td><td>注视即确认，更自然</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>visionOS 是 Apple Intelligence 与空间计算融合最深的平台；目光注视 + Siri 是独特的"所见即所知"交互范式；3D 模型空间预览对专业用户价值大。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>Apple Vision Pro 售价高昂，用户基数有限；部分 AI 功能需 M5 芯片。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>Apple Vision Pro 用户；3D 设计/工业设计专业人士；空间计算开发者。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>相比 Meta Quest / Microsoft HoloLens，苹果 AI + 空间计算整合最深；3D 模型预览是差异化功能。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>目光注视 + Siri AI 交互创新</li><li>3D 模型空间预览专业场景</li><li>全景 → 空间场景个人化</li><li>Wi-Fi 3x 提速</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>Apple Vision Pro 价格高</li><li>用户基数有限</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>空间 AI 计算新赛道</li><li>专业 3D 设计市场</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>Meta Quest AI 集成</li><li>Samsung/Hololens 竞争</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>visionOS 27</th><th>visionOS 2（参考）</th></tr></thead>
+<tbody>
+<tr><td>Siri 交互</td><td>目光注视 + 语音</td><td>语音命令</td></tr>
+<tr><td>Visual Intelligence</td><td>注视即识别</td><td>无</td></tr>
+<tr><td>3D 模型</td><td>Mac 引入空间预览</td><td>基础查看</td></tr>
+<tr><td>全景场景</td><td>全景 → 空间环境</td><td>无</td></tr>
+<tr><td>Wi-Fi</td><td>3x 连接速度</td><td>基准</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(4)">← watchOS 27</button>
+<button class="nav-btn" onclick="switchTab(6)">Xcode 27 →</button>
+</div>
+</div>
+
+<div id="pane6" class="pane">
+<div class="section">
+<div class="section-title">Xcode 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">开发工具</div>
+<h3>Xcode 27</h3>
+<p>macOS 开发环境 · 2026年秋季</p>
+<div class="rating">★★★★★ <span>AI Agent 编程助手</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Xcode AI Agent + Core AI 框架</h3>
+<p>AI 编码代理自动构建测试项目、搜索文档；Core AI 统一 AI 开发框架</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Xcode AI Agent</td><td><span class="delta up">▲ 新增</span></td><td>AI 自动构建测试项目，开发者效率革命</td></tr>
+<tr><td>Core AI 框架</td><td><span class="delta up">▲ 新增</span></td><td>统一 AI 模型开发框架</td></tr>
+<tr><td>MLX 分布式推理</td><td><span class="delta up">▲ 升级</span></td><td>Mac 本地 AI 推理优化</td></tr>
+<tr><td>Swift 27</td><td><span class="delta up">▲ 升级</span></td><td>SwiftUI 27 + 新语言特性</td></tr>
+<tr><td>Reality Composer Pro 3</td><td><span class="delta up">▲ 升级</span></td><td>游戏资产创建无需代码</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>Xcode AI Agent 是本次 WWDC 对开发者最重要的更新，AI 代理自动完成构建测试将大幅提升开发效率；Core AI 统一框架降低 AI 应用开发门槛。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>AI Agent 能力取决于 Apple Intelligence 模型质量；部分功能需 Xcode 26.3 及以上。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>Apple 平台开发者；AI 应用开发者；Swift 学习者。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>与 GitHub Copilot / Cursor 相比，Xcode AI Agent 与 Apple 生态深度集成；Core AI 对标 Google ML Kit / Apple Core ML。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>AI Agent 自动化开发流程</li><li>Core AI 统一框架</li><li>MLX 本地推理优化</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>AI Agent 依赖 Apple 模型</li><li>仅限 Apple 平台</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>AI Native App 开发</li><li>Apple 生态 AI 应用爆发</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>VS Code + Copilot 跨平台优势</li><li>JetBrains AI 集成</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>Xcode 27</th><th>Xcode 26（参考）</th></tr></thead>
+<tbody>
+<tr><td>AI 编程</td><td>AI Agent 自动构建测试</td><td>代码补全</td></tr>
+<tr><td>AI 框架</td><td>Core AI 统一框架</td><td>Core ML</td></tr>
+<tr><td>本地推理</td><td>MLX 分布式推理</td><td>基础 MLX</td></tr>
+<tr><td>3D 开发</td><td>Reality Composer Pro 3 无代码</td><td>需代码</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(5)">← visionOS 27</button>
+<button class="nav-btn" onclick="switchTab(7)">Swift 27 →</button>
+</div>
+</div>
+
+<div id="pane7" class="pane">
+<div class="section">
+<div class="section-title">Swift 27 / SwiftUI 27 — 概览</div>
+<div class="hero-grid">
+<div class="hero-card">
+<div class="tag">编程语言</div>
+<h3>Swift 27 + SwiftUI 27</h3>
+<p>Apple 官方编程语言 · 2026年秋季</p>
+<div class="rating">★★★★☆ <span>Core AI 集成 + 新语言特性</span></div>
+</div>
+<div class="hero-card">
+<div class="tag">核心亮点</div>
+<h3>Core AI 框架 + SwiftUI 新组件</h3>
+<p>Swift 内置 AI 模型调用；SwiftUI 新增 AI 相关组件</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">主要升级点</div>
+<table>
+<thead><tr><th>功能</th><th>变化</th><th>影响判断</th></tr></thead>
+<tbody>
+<tr><td>Core AI 框架</td><td><span class="delta up">▲ 新增</span></td><td>Swift 内置 AI 模型调用，降低 AI 开发门槛</td></tr>
+<tr><td>SwiftUI 新组件</td><td><span class="delta up">▲ 升级</span></td><td>AI 相关 UI 组件简化开发</td></tr>
+<tr><td>Swift 27 新特性</td><td><span class="delta up">▲ 升级</span></td><td>语言层面增强 AI 支持</td></tr>
+<tr><td>跨平台 AI</td><td><span class="delta up">▲ 统一</span></td><td>iOS/macOS/visionOS AI 开发统一</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">AI 自动总结</div>
+<div class="ai-card"><h4>✅ 优势</h4><p>Core AI 框架将 AI 能力带入 Swift 语言核心，开发者无需学习复杂 ML 框架即可调用 AI 模型；SwiftUI AI 组件降低 AI 应用 UI 开发门槛。</p></div>
+<div class="ai-card"><h4>⚠️ 限制</h4><p>Core AI 能力取决于 Apple Intelligence 模型；初期可能以 Apple 平台为主。</p></div>
+<div class="ai-card"><h4>🎯 适用人群</h4><p>Swift 开发者；AI 应用开发者；Apple 生态应用构建者。</p></div>
+<div class="ai-card"><h4>📊 竞品对比</h4><p>对标 Python + LangChain / JavaScript + AI SDK，Swift + Core AI 提供更原生的 Apple 平台 AI 开发体验。</p></div>
+</div>
+
+<div class="section">
+<div class="section-title">SWOT 分析</div>
+<div class="swot-grid">
+<div class="swot s"><h4>💪 优势 Strengths</h4><ul><li>Core AI 语言级集成</li><li>SwiftUI AI 组件</li><li>Apple 平台原生优化</li></ul></div>
+<div class="swot w"><h4>⚠️ 劣势 Weaknesses</h4><ul><li>初期仅 Apple 平台</li><li>模型能力依赖 Apple</li></ul></div>
+<div class="swot o"><h4>🚀 机会 Opportunities</h4><ul><li>Swift AI 开发者生态</li><li>Apple 平台 AI App 爆发</li></ul></div>
+<div class="swot t"><h4>🔴 威胁 Threats</h4><ul><li>跨平台 AI 框架竞争</li><li>Web AI 技术发展</li></ul></div>
+</div>
+<details><summary>📋 全量参数对比</summary>
+<table><thead><tr><th>参数</th><th>Swift 27</th><th>Swift 6（参考）</th></tr></thead>
+<tbody>
+<tr><td>AI 框架</td><td>Core AI 内置</td><td>Core ML 外部</td></tr>
+<tr><td>UI 组件</td><td>SwiftUI AI 组件</td><td>基础组件</td></tr>
+<tr><td>平台支持</td><td>iOS/macOS/visionOS/watchOS</td><td>iOS/macOS/tvOS</td></tr>
+</table></details>
+</div>
+
+<div class="nav-btns">
+<button class="nav-btn" onclick="switchTab(6)">← Xcode 27</button>
+<button class="nav-btn" disabled>报告结束</button>
+</div>
+</div>
+
+</div>
+
+<script>
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-tab="'+n+'"]').classList.add('active');
+  document.getElementById('pane'+n).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.tab').forEach(b=>
+  b.addEventListener('click',()=>switchTab(+b.dataset.tab)));
+</script>
+</body>
+</html>
