@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>影石 Luna Ultra · 深度调研报告 v4.1</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root{
+    --bg:#ffffff;--card-bg:#f5f5f7;--text:#1d1d1f;--text-secondary:#86868b;
+    --border:#d2d2d7;--line:#e8e8ea;--accent:#0071e3;--brand:#9a7b4f;
+    --up:#1f6b43;--up-bg:#e7f1ea;--down:#9a4f2e;--down-bg:#f5e7e0;--flat:#6b6b70;--flat-bg:#eeeeef;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);
+    font-family:-apple-system,'SF Pro Display','Helvetica Neue','PingFang SC',sans-serif;
+    font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  section{padding:44px 0;border-top:1px solid var(--line);}
+  h1{font-size:36px;font-weight:700;letter-spacing:-0.02em;line-height:1.08;}
+  h2{font-size:24px;font-weight:600;margin-bottom:8px;display:flex;align-items:baseline;gap:8px;}
+  h3{font-size:17px;font-weight:600;margin-bottom:8px;}
+  p{margin-bottom:10px;}
+  .sec-sub{color:var(--text-secondary);font-size:13px;margin:0 0 18px;}
+  .hint{font-size:12px;color:var(--brand);font-weight:500;}
+
+  /* —— tooltip —— */
+  .rated{position:relative;cursor:help;border-bottom:1px dotted var(--border);display:inline-block;}
+  .rated .tip{
+    position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(4px);
+    width:248px;background:#1d1d1f;color:#fff;font-size:12px;line-height:1.5;text-align:left;
+    padding:11px 13px;border-radius:9px;opacity:0;visibility:hidden;
+    transition:opacity .18s ease,transform .18s ease;z-index:30;pointer-events:none;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);font-weight:400;letter-spacing:0;}
+  .rated .tip b{color:#ffd9a8;font-weight:600;}
+  .rated .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:#1d1d1f;}
+  .rated:hover .tip,.rated:focus .tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+
+  /* —— delta chip —— */
+  .delta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+    padding:3px 10px;border-radius:20px;white-space:nowrap;}
+  .delta .ico{font-size:10px;line-height:1;}
+  .delta.up{color:var(--up);background:var(--up-bg);}
+  .delta.down{color:var(--down);background:var(--down-bg);}
+  .delta.flat{color:var(--flat);background:var(--flat-bg);}
+
+  /* ① HERO */
+  .hero{padding:48px 0 0;}
+  .hero-top{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:center;}
+  .brand-tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.05em;
+    color:var(--brand);text-transform:uppercase;margin-bottom:12px;}
+  .hero h1{margin-bottom:12px;}
+  .hero .oneline{font-size:16px;margin-bottom:18px;line-height:1.5;}
+  .hero-visual svg{width:100%;height:auto;display:block;border-radius:14px;}
+  .img-caption{font-size:12px;color:var(--text-secondary);margin-top:6px;text-align:center;}
+  .hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px;}
+  .hg{background:var(--card-bg);border-radius:12px;padding:14px 16px;}
+  .hg .l{font-size:11px;color:var(--text-secondary);margin-bottom:5px;}
+  .hg .v{font-size:18px;font-weight:600;line-height:1.2;}
+  .hg .v small{font-size:12px;color:var(--text-secondary);font-weight:500;}
+  .stars{background:var(--card-bg);border-radius:12px;padding:16px 14px;margin-top:12px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .star-item{text-align:center;}
+  .star-item .rated{border-bottom:1px dotted var(--border);}
+  .star-item .dim{font-size:12px;color:var(--text-secondary);margin-bottom:4px;}
+  .star-item .s{font-size:13px;letter-spacing:1px;color:var(--brand);}
+  .star-item .s .off{color:var(--border);}
+
+  /* ② TOP5 */
+  .top5{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .up-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;display:flex;gap:14px;}
+  .up-card .num{font-size:26px;font-weight:700;color:var(--brand);line-height:1;min-width:30px;}
+  .up-card .ttl{font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .up-card .txt{font-size:13px;color:var(--text-secondary);line-height:1.45;}
+  .badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:#eceae4;color:var(--brand);white-space:nowrap;cursor:help;position:relative;border-bottom:none;}
+  .badge.first{background:#f6e9e2;color:#b4623a;}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;padding:10px 14px;border-bottom:2px solid var(--text);
+    font-weight:600;font-size:12px;color:var(--text-secondary);}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  .diff td:first-child{color:var(--text-secondary);width:80px;font-weight:500;}
+  .diff tr.changed{background:#fbfbfa;}
+  .diff .impact{color:var(--text-secondary);font-size:12px;display:block;margin-top:4px;font-weight:400;}
+
+  /* ④ AI */
+  .ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .ai-card{background:var(--card-bg);border-radius:12px;padding:18px 20px;}
+  .ai-card h3{font-size:14px;margin-bottom:8px;}
+  .ai-card ul{list-style:none;}
+  .ai-card li{font-size:13px;color:var(--text-secondary);line-height:1.5;padding:3px 0 3px 16px;position:relative;}
+  .ai-card li::before{content:'·';position:absolute;left:4px;color:var(--brand);font-weight:700;}
+  .ai-card p{font-size:13px;color:var(--text-secondary);line-height:1.55;margin:0;}
+
+  /* ⑤ change + chart */
+  .change-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+  .ch{background:var(--card-bg);border-radius:12px;padding:16px 18px;}
+  .ch .hd{font-weight:600;font-size:14px;margin-bottom:10px;}
+  .ch.upc .hd{color:var(--up);}.ch.downc .hd{color:var(--down);}.ch.flatc .hd{color:var(--flat);}
+  .ch li{list-style:none;font-size:12.5px;color:var(--text-secondary);line-height:1.45;padding:5px 0;border-bottom:1px solid var(--line);}
+  .ch li:last-child{border-bottom:none;}.ch li b{color:var(--text);font-weight:600;}
+  .chart-box{background:var(--card-bg);border-radius:14px;padding:22px;}
+  .chart-wrap{position:relative;height:300px;}
+  .basis-tbl{margin-top:18px;}
+  .basis-tbl td:first-child{width:120px;color:var(--text);font-weight:500;}
+  .basis-tbl td:nth-child(2){width:64px;font-variant-numeric:tabular-nums;color:var(--brand);font-weight:600;}
+  .basis-tbl td:nth-child(3){color:var(--text-secondary);font-size:13px;}
+
+  /* ⑥ SWOT */
+  .swot{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .sw{border-radius:12px;padding:18px 20px;background:var(--card-bg);}
+  .sw .hd{font-weight:600;font-size:14px;margin-bottom:10px;}
+  .sw.s .hd{color:var(--up);}.sw.w .hd{color:var(--down);}.sw.o .hd{color:var(--accent);}.sw.r .hd{color:#8a6d3b;}
+  .sw li{list-style:none;font-size:13px;color:var(--text-secondary);line-height:1.5;padding:4px 0 4px 14px;position:relative;}
+  .sw li::before{content:'';position:absolute;left:2px;top:11px;width:4px;height:4px;border-radius:50%;background:var(--border);}
+
+  /* ⑦ details */
+  details{background:var(--card-bg);border-radius:14px;padding:6px 22px;}
+  summary{cursor:pointer;font-weight:600;font-size:15px;padding:14px 0;list-style:none;display:flex;align-items:center;gap:8px;}
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:'▸';color:var(--brand);transition:transform .2s;}
+  details[open] summary::before{transform:rotate(90deg);}
+  details td:first-child{color:var(--text-secondary);width:120px;}
+
+  footer{padding:36px 0 64px;border-top:1px solid var(--line);}
+  footer p{font-size:12px;color:var(--text-secondary);line-height:1.65;margin-bottom:7px;}
+
+  @media(max-width:768px){
+    h1{font-size:28px;}
+    .hero-top{grid-template-columns:1fr;}
+    .hero-grid{grid-template-columns:repeat(2,1fr);}
+    .stars{grid-template-columns:repeat(3,1fr);row-gap:14px;}
+    .top5,.ai-grid,.swot{grid-template-columns:1fr;}
+    .change-cols{grid-template-columns:1fr;}
+    section{padding:36px 0;}
+    .rated .tip{width:200px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ① HERO -->
+<section class="hero" style="border-top:none;">
+  <div class="hero-top">
+    <div>
+      <span class="brand-tag">Insta360 × Leica · 单品深度调研 v4.1</span>
+      <h1>影石 Luna Ultra</h1>
+      <p class="oneline">影石<strong>首款</strong>手持云台相机，1 英寸 + 长焦双徕卡镜头、可拆卸图传屏、三 AI 芯片夜景——一台「媲美微单的口袋创作工具」。</p>
+    </div>
+    <div class="hero-visual">
+      <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Luna Ultra 示意图">
+        <rect width="460" height="300" fill="#f0f0f2" rx="14"/>
+        <g transform="translate(150,40)">
+          <rect x="40" y="120" width="56" height="150" rx="13" fill="#26262a"/>
+          <rect x="48" y="138" width="40" height="66" rx="7" fill="#36363a"/>
+          <circle cx="68" cy="226" r="10" fill="#1a1a1d"/><circle cx="68" cy="226" r="4.5" fill="#5a5a5c"/>
+          <rect x="56" y="88" width="22" height="48" rx="7" fill="#26262a"/>
+          <g transform="translate(26,28)">
+            <rect x="0" y="0" width="80" height="78" rx="16" fill="#1a1a1d"/>
+            <circle cx="29" cy="40" r="22" fill="#0a0a0a" stroke="#9a7b4f" stroke-width="2.5"/>
+            <circle cx="29" cy="40" r="11" fill="#15151a"/><circle cx="24" cy="35" r="3.5" fill="#33333a"/>
+            <circle cx="61" cy="40" r="14" fill="#0a0a0a" stroke="#9a7b4f" stroke-width="2"/>
+            <circle cx="61" cy="40" r="6.5" fill="#15151a"/>
+            <circle cx="13" cy="13" r="4.5" fill="#b4623a"/>
+          </g>
+        </g>
+        <g transform="translate(300,90)">
+          <rect x="0" y="0" width="96" height="128" rx="13" fill="#1a1a1d"/>
+          <rect x="9" y="9" width="78" height="110" rx="6" fill="#0a0a0a"/>
+          <rect x="17" y="22" width="62" height="74" rx="3" fill="#22222a"/>
+          <text x="48" y="63" text-anchor="middle" fill="#5a5a5c" font-size="11" font-family="sans-serif">2″ OLED</text>
+          <circle cx="48" cy="108" r="7" fill="#3a3a3c"/>
+        </g>
+        <text x="300" y="234" text-anchor="middle" fill="#86868b" font-size="11" font-family="sans-serif">可拆卸图传屏</text>
+      </svg>
+      <p class="img-caption">示意图（依官方规格手绘，非官方照片）</p>
+    </div>
+  </div>
+
+  <div class="hero-grid">
+    <div class="hg"><div class="l">发布日期</div><div class="v">2026.6.10</div></div>
+    <div class="hg"><div class="l">定位</div><div class="v" style="font-size:15px;">8K 徕卡双摄<br>旗舰云台相机</div></div>
+    <div class="hg"><div class="l">起售价（标准套装）</div><div class="v tnum">¥3999 <small>起</small></div></div>
+    <div class="hg"><div class="l">目标用户</div><div class="v" style="font-size:14px;">Vlog 创作者 /<br>旅行记录 / 摄影爱好者</div></div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:20px;">
+    <h3 style="margin:0;">核心亮点评分</h3>
+    <span class="hint">💡 鼠标移到星级上看评分依据</span>
+  </div>
+  <div class="stars">
+    <div class="star-item"><div class="dim">影像</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>影像 5★</b>：1″ 主摄 F1.8 + 1/1.3″ 长焦 + 徕卡调校，14 档动态、8K 杜比视界、10-bit I-Log。同品类（口袋云台）里传感器规格与色彩链路均属顶配，无明显短板。</span>
+      </span></div>
+    <div class="star-item"><div class="dim">长焦/变焦</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>长焦/变焦 4★</b>：6× 无损 + 12× 混合，焦段覆盖 20–240mm；对标 <b>Osmo Pocket 4 为单摄、无真长焦</b>，故领先。扣 1★：长焦端 1/1.3″ 底小于主摄，画质有落差。</span>
+      </span></div>
+    <div class="star-item"><div class="dim">便携</div>
+      <span class="rated" tabindex="0"><span class="s">★★★<span class="off">★★</span></span>
+        <span class="tip"><b>便携 3★</b>：233g，<b>略重于 Osmo Pocket 4（约 230g）</b>；同厂 GO 系列、多数口袋机更轻。双摄换来的体重，日常便携属中等，故 3★。</span>
+      </span></div>
+    <div class="star-item"><div class="dim">续航</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>续航 4★</b>：1550mAh，连续拍约 <b>240 分钟</b>，优于 Osmo Pocket 4 的约 150 分钟；快充 23 分钟到 80%。扣 1★：内置 47GB 偏小，长拍受存储而非电量限制。</span>
+      </span></div>
+    <div class="star-item"><div class="dim">后期生态</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>后期生态 5★</b>：10-bit I-Log + 杜比视界 + ACES/DaVinci 原生支持，徕卡机内色彩，App AI 自动剪辑 5 分钟出片。媒体普遍评价影石 App 易用度、滤镜丰富度优于 DJI Mimo。</span>
+      </span></div>
+  </div>
+</section>
+
+<!-- ② TOP5 -->
+<section>
+  <h2>🚀 本代升级 Top 5</h2>
+  <p class="sec-sub">影石云台首作，"升级"指相对同品类标杆的差异化卖点。<span class="hint">💡 鼠标移到标签上看对比依据</span></p>
+  <div class="top5">
+    <div class="up-card"><div class="num">①</div><div>
+      <div class="ttl">双徕卡 Summicron 镜头
+        <span class="rated badge first" tabindex="0">徕卡首发
+          <span class="tip"><b>首发依据</b>：影石云台产品线<b>首次与徕卡联合研发</b>，从光学到色彩全程定制；双 Summicron 镜头组合为口袋云台品类首例（对手 DJI/大疆均无徕卡联名云台）。</span>
+        </span></div>
+      <div class="txt">1″ 主摄（20mm F1.8）+ 1/1.3″ 长焦（60mm F2.0），口袋云台少见的双摄 + 真长焦。</div></div></div>
+    <div class="up-card"><div class="num">②</div><div>
+      <div class="ttl">可拆卸 2″ OLED 图传屏
+        <span class="rated badge" tabindex="0">首发设计
+          <span class="tip"><b>首发依据</b>：屏幕可从机身<b>拆下独立使用</b>，Wi-Fi 最远 20m 遥控图传，屏顶内置麦克风。对标 Osmo Pocket 4 为<b>固定旋转屏、不可拆</b>，此为该品类首见形态。</span>
+        </span></div>
+      <div class="txt">自拍/合拍/远程构图更灵活，屏可当独立遥控器。</div></div></div>
+    <div class="up-card"><div class="num">③</div><div>
+      <div class="ttl">三 AI 芯片 · 卓越夜景
+        <span class="rated badge" tabindex="0">同代领先
+          <span class="tip"><b>领先依据</b>：<b>双影像芯片 + 4nm AI 芯片</b>共三枚，对标 Osmo Pocket 4 为单芯片方案；PureVideo 暗光最高 4K60，弱光降噪算力为同期口袋云台高配。</span>
+        </span></div>
+      <div class="txt">主打"三芯卓越夜景"，弱光场景降噪提亮。</div></div></div>
+    <div class="up-card"><div class="num">④</div><div>
+      <div class="ttl">12× 变焦（含 6× 无损）
+        <span class="rated badge" tabindex="0">同代领先
+          <span class="tip"><b>领先依据</b>：独立变焦推杆 + <b>6× 光学无损变焦</b>，对手单摄机型多为数码变焦裁切；连续推拉变焦能力为同期口袋云台少有。</span>
+        </span></div>
+      <div class="txt">长焦拍半身人像/远景不靠数码裁切硬放大。</div></div></div>
+    <div class="up-card"><div class="num">⑤</div><div>
+      <div class="ttl">10-bit I-Log 专业链路
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：<b>10-bit I-Log + 杜比视界 + 14 档动态 + ACES/DaVinci 原生支持</b>；影石此前 Ace Pro 2、X5 均不支持 10-bit，本机首次补齐专业后期链路。</span>
+        </span></div>
+      <div class="txt">8K30 杜比视界、徕卡色彩 + App AI 自动剪辑。</div></div></div>
+    <div class="up-card"><div class="num">＋</div><div>
+      <div class="ttl">4 麦克风 32-bit float
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：机身 <b>4 麦克风 + 48kHz/32-bit float</b> 收音，可直连 Mic Air/Mic Pro 并自动对齐双声道时间码；优于多数口袋机的 2–3 麦克风方案。</span>
+        </span></div>
+      <div class="txt">收音更专业，可直连影石 Mic 系列无线麦。</div></div></div>
+  </div>
+</section>
+
+<!-- ③ DIFF -->
+<section>
+  <h2>📊 参数变化 Diff</h2>
+  <p class="sec-sub">vs 同品类标杆 DJI Osmo Pocket 4（单摄）。注：二者非严格同类，仅看 Luna Ultra 卡位；DJI 双摄 Pocket 4P 发布时尚未上市。</p>
+  <table class="diff">
+    <thead><tr><th>维度</th><th>对标 Osmo Pocket 4</th><th>Luna Ultra</th><th>变化与影响</th></tr></thead>
+    <tbody>
+      <tr class="changed"><td>主摄</td><td>1″ CMOS · 单摄</td><td>1″ · 20mm · F1.8 · 徕卡</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">底相当但加徕卡调校，真影响出片观感</span></td></tr>
+      <tr class="changed"><td>长焦</td><td>无（单镜头）</td><td>1/1.3″ · 60mm · F2.0</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真升级：多一颗长焦，人像/远景构图质变</span></td></tr>
+      <tr class="changed"><td>变焦</td><td>数码为主</td><td>12× 混合 / 6× 无损</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：无损长焦是核心差异点</span></td></tr>
+      <tr class="changed"><td>处理</td><td>单芯片</td><td>三 AI 芯片（含 4nm）</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">影响夜景/降噪，弱光场景能感知</span></td></tr>
+      <tr class="changed"><td>屏幕</td><td>固定旋转屏</td><td>可拆卸 2″ OLED 图传</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：可拆是玩法差异，但也带来进水风险</span></td></tr>
+      <tr class="changed"><td>视频</td><td>4K120</td><td>8K30 · 10-bit I-Log</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">8K 多为规格意义，10-bit/Log 才真影响后期</span></td></tr>
+      <tr><td>音频</td><td>3 麦克风</td><td>4 麦 · 32-bit float</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">小升级，重度收音用户能用上</span></td></tr>
+      <tr><td>续航</td><td>约 150 分钟</td><td>约 240 分钟</td><td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：长拍更省心，快充 23 分钟到 80%</span></td></tr>
+      <tr class="changed"><td>存储</td><td>内置 107GB</td><td>内置 47GB（+microSD）</td><td><span class="delta down"><span class="ico">▼</span>缩水</span><span class="impact">缩水：不到对手一半，忘带卡风险高（争议）</span></td></tr>
+      <tr><td>重量</td><td>约 230g</td><td>233g / 235g</td><td><span class="delta flat"><span class="ico">＝</span>持平</span><span class="impact">略重 3g，基本持平，双摄换来的</span></td></tr>
+      <tr class="changed"><td>防护</td><td>不防水</td><td>不防水（更怕进水）</td><td><span class="delta down"><span class="ico">▼</span>退步</span><span class="impact">争议：模组化设计，水边拍摄需另购防水壳</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ④ AI -->
+<section>
+  <h2>🧠 AI 自动总结</h2>
+  <p class="sec-sub">结论先行，帮你省时间。客观陈述，不替你下"买不买"。</p>
+  <div class="ai-grid">
+    <div class="ai-card"><h3>为什么做这台？</h3>
+      <p>影石在运动/全景/迷你相机已建立品牌力，唯独缺席大疆深耕多年的"手持云台"赛道。Luna 系列是补齐品类的开山之作，用"双摄 + 徕卡 + 可拆图传屏"做差异化，直接卡旗舰价位，避免和单摄方案正面拼价格。</p></div>
+    <div class="ai-card"><h3>✅ 真正影响体验的升级</h3>
+      <ul><li>长焦 + 6× 无损变焦——口袋云台少见，构图自由度质变</li>
+      <li>10-bit I-Log + 徕卡色彩——后期空间大，专业可用</li>
+      <li>三芯夜景 + 240 分钟续航——弱光与长拍两个高频痛点</li></ul></div>
+    <div class="ai-card"><h3>⚠️ 偏规格 / 参数通胀</h3>
+      <ul><li>8K30：多数 Vlog 发 4K，8K 更多是规格与裁切余量</li>
+      <li>2 亿像素全景照片：营销数字，日常感知有限</li>
+      <li>32-bit float 收音：仅重度收音/后期用户用得上</li></ul></div>
+    <div class="ai-card"><h3>📣 值得宣传的记忆点</h3>
+      <ul><li>"徕卡联名 + 双镜头"——口袋云台独一份的身份标签</li>
+      <li>"屏幕能拆下来当遥控"——直观易传播的差异点</li>
+      <li>"8K 徕卡 + 三芯夜景"——参数宣传的记忆锚</li></ul></div>
+  </div>
+</section>
+
+<!-- ⑤ change + chart + basis -->
+<section>
+  <h2>📈 与同品类标杆的变化</h2>
+  <p class="sec-sub">Luna Ultra 是影石云台首作，无上代——以 DJI Osmo Pocket 4 作纵向参照，归纳升/降/平。</p>
+  <div class="change-cols">
+    <div class="ch upc"><div class="hd">▲ 提升项</div><ul>
+      <li><b>多一颗长焦</b>：构图自由度、人像虚化</li>
+      <li><b>无损变焦 6×</b>：远摄不靠裁切</li>
+      <li><b>续航 240 分钟</b>：长拍更省心</li>
+      <li><b>10-bit/Log 链路</b>：后期空间</li>
+      <li><b>可拆图传屏</b>：遥控/合拍玩法</li></ul></div>
+    <div class="ch downc"><div class="hd">▼ 退步/缩水项</div><ul>
+      <li><b>内置存储 47GB</b>：不到对手一半</li>
+      <li><b>模组化更怕水</b>：进水风险更高</li>
+      <li><b>价格更高</b>：双摄旗舰推高门槛</li></ul></div>
+    <div class="ch flatc"><div class="hd">＝ 基本持平项</div><ul>
+      <li><b>重量</b>：233g vs 230g，几乎一样</li>
+      <li><b>防水</b>：两者都不支持</li>
+      <li><b>形态</b>：镜头+云台+旋转屏主流设计</li></ul></div>
+  </div>
+  <div class="chart-box">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <h3 style="font-size:14px;margin:0;">关键能力相对得分</h3>
+      <span class="hint">💡 柱子可悬停看依据，下方表格常驻</span>
+    </div>
+    <p class="sec-sub" style="margin:0 0 14px;">满分 100，每项依据见下表。便携/存储以"越高越好"归一化（轻=高分、存储多=高分）。</p>
+    <div class="chart-wrap"><canvas id="bar"></canvas></div>
+    <table class="basis-tbl">
+      <thead><tr><th>维度</th><th>Luna 分</th><th>评分客观依据（vs Osmo Pocket 4）</th></tr></thead>
+      <tbody>
+        <tr><td>影像画质</td><td>90</td><td>同为 1″ 主摄，Luna 多徕卡调校 + 14 档动态 + 10-bit；对手 80 为缺 10-bit/Log</td></tr>
+        <tr><td>长焦/变焦</td><td>90</td><td>6× 无损/12× 混合 vs 对手单摄无真长焦（52）</td></tr>
+        <tr><td>夜景</td><td>85</td><td>三 AI 芯片 + PureVideo 4K60 vs 对手单芯片（78）</td></tr>
+        <tr><td>便携</td><td>70</td><td>233g，重于对手 230g 与更轻的 GO 系列，故未满分（对手 82）</td></tr>
+        <tr><td>续航</td><td>80</td><td>约 240 分钟 vs 对手约 150 分钟（68）</td></tr>
+        <tr><td>后期生态</td><td>88</td><td>I-Log+ACES+易用 App vs 对手 Mimo（80）</td></tr>
+        <tr><td>内置存储</td><td>44</td><td>47GB vs 对手 107GB，约 0.44 倍（对手 100）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ⑥ SWOT -->
+<section>
+  <h2>🏆 竞品 SWOT</h2>
+  <p class="sec-sub">主要对手 DJI Osmo Pocket 4 / 即将上市的 Pocket 4P。</p>
+  <div class="swot">
+    <div class="sw s"><div class="hd">优势 Strengths</div><ul>
+      <li>双徕卡镜头 + 真长焦，口袋云台差异化最强</li>
+      <li>10-bit I-Log + 杜比视界，专业后期链路完整</li>
+      <li>可拆图传屏带来独特玩法</li>
+      <li>影石 App + AI 剪辑易用度高、滤镜丰富</li></ul></div>
+    <div class="sw w"><div class="hd">不足 Weaknesses</div><ul>
+      <li>内置存储仅 47GB，明显偏少</li>
+      <li>不防水，模组化设计沾水风险高</li>
+      <li>233g 略重，价格门槛较高</li>
+      <li>第一代产品，成熟度与长期稳定性待验证</li></ul></div>
+    <div class="sw o"><div class="hd">机会 Opportunities</div><ul>
+      <li>大疆双摄 Pocket 4P 尚未上市，存在卡位窗口</li>
+      <li>影石既有运动/全景用户可顺势转化</li>
+      <li>徕卡联名强化品牌溢价与传播</li></ul></div>
+    <div class="sw r"><div class="hd">风险 Risks</div><ul>
+      <li>Pocket 4P 上市后正面对撞双摄市场</li>
+      <li>"第一代观望"心理，部分用户等迭代</li>
+      <li>大疆生态/配件成熟度仍是壁垒</li></ul></div>
+  </div>
+</section>
+
+<!-- ⑦ 全量参数 -->
+<section>
+  <h2>📋 全量参数</h2>
+  <details>
+    <summary>展开全部规格</summary>
+    <table>
+      <tr><td>产品名称</td><td>影石 Insta360 Luna Ultra（徕卡联合研发）</td></tr>
+      <tr><td>发布 / 上市</td><td>2026 年 6 月 10 日发布，已开售</td></tr>
+      <tr><td>主摄</td><td>1 英寸 · 等效 20mm · F1.8 · 14 档动态 · 8K30 杜比视界</td></tr>
+      <tr><td>长焦</td><td>1/1.3 英寸 · 等效 60mm · F2.0 · 最近对焦约 15cm</td></tr>
+      <tr><td>变焦</td><td>1–12× 混合（含 6× 无损）· 独立变焦推杆</td></tr>
+      <tr><td>视频规格</td><td>8K30 / 4K120 / 1080p240 · 10-bit · I-Log · 杜比视界 HDR</td></tr>
+      <tr><td>照片</td><td>最高约 37MP · 2 亿像素全景模式</td></tr>
+      <tr><td>处理芯片</td><td>三 AI 芯片：双影像芯片 + 4nm AI 芯片</td></tr>
+      <tr><td>夜景 / 追踪</td><td>PureVideo 暗光最高 4K60 · Deep Track 5.0</td></tr>
+      <tr><td>云台</td><td>三轴机械增稳 · 抖动抑制约 ±0.005° · 最大转速约 210°/s</td></tr>
+      <tr><td>屏幕</td><td>可拆卸 2.0″ OLED · 318×564 · 约 1000 尼特 · 内置麦克风 · Wi-Fi 图传最远 20m</td></tr>
+      <tr><td>音频</td><td>4 麦克风 · 48kHz/32-bit float · 可直连 Mic Air / Mic Pro</td></tr>
+      <tr><td>电池 / 续航</td><td>主机 1550mAh + 屏 210mAh · 约 240 分钟 · 23 分钟充至 80%</td></tr>
+      <tr><td>存储</td><td>内置 47GB + microSD（最高 1TB）</td></tr>
+      <tr><td>尺寸 / 重量</td><td>52.4×169.9×38.5mm · 233g（星曜黑）/ 235g（月光白）</td></tr>
+      <tr><td>防护</td><td>不防水防尘（模组化，需另购防水壳）</td></tr>
+      <tr><td>配色</td><td>星曜黑 / 月光白</td></tr>
+      <tr><td>套装价格（¥）</td><td>标准 3999（国补到手 / 官网 4705）· 随行 4358 · 续航 4558 · Vlog 4568 · 创作者 4879（首发 4849）</td></tr>
+    </table>
+  </details>
+</section>
+
+<!-- ⑧ 来源 -->
+<footer>
+  <p><strong>📎 数据与图片来源</strong></p>
+  <p>· 影石官方规格页 onlinemanual.insta360.com/lunaultra（镜头/焦距/续航/重量等以官方为准）</p>
+  <p>· 影石官网产品页 insta360.com/product/insta360-luna-ultra（视频规格、色彩档案、套装配件）</p>
+  <p>· IT之家、少数派、新浪/雷科技、知乎、Masablog、allaboucam 等发布报道与评测（价格、套装、上手反馈、争议点、对手续航等对比数据）</p>
+  <p style="margin-top:10px;">评分说明：星级与能力得分为<strong>本报告主观评估</strong>，每项均附客观依据（悬停星级 / 见得分依据表）。对手数据（如 Osmo Pocket 4 续航、存储）取自公开规格与媒体评测，用于横向参照，非厂商官方对比。</p>
+  <p style="margin-top:10px;">图片说明：本报告所有图形均为<strong>依官方规格手绘的 SVG 示意图</strong>，非官方实拍。沙箱网络未开放影石图片 CDN，按规范以标注清楚的示意图替代，官方实拍见上述官网页面。</p>
+  <p style="margin-top:10px;color:#b0b0b3;">本报告为产品调研整理，客观陈述公开信息与媒体观点，不构成购买建议。生成于 2026-06-23（skill v4.1）。</p>
+</footer>
+
+</div>
+
+<script>
+Chart.defaults.color='#86868b';
+Chart.defaults.borderColor='#e5e5e5';
+Chart.defaults.font.family="-apple-system,'SF Pro Display','PingFang SC',sans-serif";
+
+const basis={
+  '影像画质':'同 1″ 主摄，Luna 多徕卡调校+14档动态+10-bit',
+  '长焦/变焦':'6× 无损/12× 混合，对手单摄无真长焦',
+  '夜景':'三 AI 芯片 + PureVideo 4K60，对手单芯片',
+  '便携':'233g，重于对手 230g 及更轻的 GO 系列',
+  '续航':'约 240 分钟 vs 对手约 150 分钟',
+  '后期生态':'I-Log+ACES+易用 App，对手为 Mimo',
+  '内置存储':'47GB vs 对手 107GB，约 0.44 倍'
+};
+
+new Chart(document.getElementById('bar'),{
+  type:'bar',
+  data:{
+    labels:['影像画质','长焦/变焦','夜景','便携','续航','后期生态','内置存储'],
+    datasets:[
+      {label:'Luna Ultra',data:[90,90,85,70,80,88,44],backgroundColor:'#9a7b4f',borderRadius:4,barPercentage:0.62,categoryPercentage:0.7},
+      {label:'Osmo Pocket 4（参照）',data:[80,52,78,82,68,80,100],backgroundColor:'#d2d2d7',borderRadius:4,barPercentage:0.62,categoryPercentage:0.7}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    scales:{x:{min:0,max:100,grid:{color:'#e5e5e5'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:11}}}},
+    plugins:{
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:12},padding:14}},
+      tooltip:{callbacks:{
+        afterLabel:(ctx)=> ctx.datasetIndex===0 && basis[ctx.label] ? '依据：'+basis[ctx.label] : ''
+      }}
+    }
+  }
+});
+</script>
+</body>
+</html>

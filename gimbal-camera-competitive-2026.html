@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 旗舰云台相机竞品分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --card-bg: #f5f5f7;
+    --text: #1d1d1f;
+    --text-secondary: #86868b;
+    --border: #d2d2d7;
+    --accent: #0071e3;
+
+    /* 各竞品低饱和品牌色 */
+    --c-luna:    #2d5a8e;  /* 影石 Luna Ultra */
+    --c-p4p:     #2b2b2d;  /* 大疆 Pocket 4P */
+    --c-p4:      #6e6e73;  /* 大疆 Pocket 4 */
+    --c-p3:      #a8a8ad;  /* 大疆 Pocket 3 */
+    --c-feiyu:   #b06a3a;  /* Feiyu Pocket 4 */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── 标题区 ── */
+  .hero { padding: 100px 0 72px; border-bottom: 1px solid var(--border); }
+  .hero-eyebrow {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 52px; font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.08; margin-bottom: 20px;
+  }
+  .hero-sub { font-size: 19px; color: var(--text-secondary); max-width: 640px; }
+  .hero-meta { display: flex; gap: 36px; margin-top: 40px; flex-wrap: wrap; }
+  .hero-meta-item { font-size: 13px; color: var(--text-secondary); }
+  .hero-meta-item strong {
+    display: block; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px;
+  }
+
+  /* ── 章节 ── */
+  .section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;
+  }
+  .section h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .section-intro { font-size: 17px; color: var(--text-secondary); margin-bottom: 48px; max-width: 680px; }
+
+  /* ── KPI 卡片 ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 48px; }
+  .kpi-card {
+    background: var(--card-bg); border-radius: 16px; padding: 24px 20px;
+    position: relative; overflow: hidden;
+  }
+  .kpi-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-bottom: 10px; min-height: 32px; }
+  .kpi-value { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; margin-bottom: 8px; }
+  .kpi-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+  /* ── 图表 ── */
+  .chart-wrap { background: var(--card-bg); border-radius: 16px; padding: 32px; }
+  .chart-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .chart-caption { font-size: 12px; color: var(--text-secondary); margin-bottom: 24px; }
+  .chart-container { position: relative; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 48px; }
+
+  /* ── 表格 ── */
+  .table-wrap { margin-top: 48px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    text-align: left; padding: 12px 14px; border-bottom: 2px solid var(--text);
+    font-weight: 600; font-size: 12px; color: var(--text-secondary); white-space: nowrap;
+  }
+  thead th:first-child { color: var(--text); }
+  tbody td { padding: 13px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:first-child { font-weight: 600; color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+  .num { font-variant-numeric: tabular-nums; }
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; background: #e8f0fb; color: var(--accent); margin-left: 5px; vertical-align: middle;
+  }
+  .badge-green { background: #e3f5e8; color: #1a7a35; }
+  .badge-warn  { background: #fff3e0; color: #b05000; }
+  .badge-gray  { background: #f0f0f2; color: var(--text-secondary); }
+
+  /* ── 竞品画像 ── */
+  .profile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 48px; }
+  .profile-card { background: var(--card-bg); border-radius: 16px; padding: 30px; position: relative; overflow: hidden; }
+  .profile-accent { position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+  .profile-name { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+  .profile-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 18px; }
+  .profile-price { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-bottom: 18px; }
+  .profile-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .tag { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; background: rgba(0,0,0,0.06); color: var(--text); }
+  .profile-summary { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; border-top: 1px solid var(--border); padding-top: 16px; }
+
+  /* ── 蓝海四象限 ── */
+  .blueocean-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 48px; }
+  .bo-card { background: var(--card-bg); border-radius: 12px; padding: 24px; }
+  .bo-icon { font-size: 20px; margin-bottom: 10px; }
+  .bo-action { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .bo-items { list-style: none; font-size: 13.5px; line-height: 1.5; }
+  .bo-items li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .bo-items li:last-child { border-bottom: none; }
+
+  /* ── 波特五力 ── */
+  .porter-wrap { margin-top: 48px; }
+  .porter-table td:first-child { font-size: 14px; color: var(--text); font-weight: 600; white-space: normal; }
+  .force-score { display: inline-flex; gap: 3px; }
+  .force-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .force-dot.on { background: var(--c-luna); }
+
+  /* ── 结论 ── */
+  .conclusion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 48px; }
+  .conclusion-card { background: var(--card-bg); border-radius: 16px; padding: 26px; }
+  .conclusion-card .pname { font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .conclusion-card p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; }
+
+  .insight-list { margin-top: 40px; padding: 32px; background: var(--card-bg); border-radius: 16px; }
+  .insight-list h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+  .insight-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; line-height: 1.5; }
+  .insight-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .insight-num { font-size: 13px; font-weight: 700; color: var(--accent); padding-top: 2px; flex-shrink: 0; font-variant-numeric: tabular-nums; width: 24px; }
+
+  /* ── 来源 ── */
+  .sources { padding: 40px 0; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+  .sources strong { color: var(--text); }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 36px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .profile-grid { grid-template-columns: 1fr; }
+    .blueocean-grid { grid-template-columns: repeat(2, 1fr); }
+    .conclusion-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .blueocean-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 20px; }
+    .hero { padding: 60px 0 48px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 标题区 -->
+  <div class="hero">
+    <div class="hero-eyebrow">竞品分析报告 · 2026 年 6 月</div>
+    <h1>旗舰云台相机<br>市场全景</h1>
+    <p class="hero-sub">影石 Luna Ultra 终结大疆垄断的那一年。本报告横向梳理市面上五款主力机型的规格、定价、竞争策略与市场走势。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>分析时间</strong>2026 年 6 月</div>
+      <div class="hero-meta-item"><strong>覆盖机型</strong>5 款主力 + 多家在路上</div>
+      <div class="hero-meta-item"><strong>分析框架</strong>波特五力 · 定位地图 · 蓝海策略</div>
+      <div class="hero-meta-item"><strong>分析目的</strong>产品定位 / 竞争格局</div>
+    </div>
+  </div>
+
+  <!-- ② 核心指标卡片 -->
+  <div class="section">
+    <div class="section-label">市场速览</div>
+    <h2>五款主力，一眼看清</h2>
+    <p class="section-intro">从 ¥3,799 的双摄旗舰到 €300 的预算黑马，2026 年的云台相机第一次有了真正意义上的多极竞争。</p>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-bar" style="background:var(--c-luna)"></div>
+        <div class="kpi-label">影石 Luna Ultra</div>
+        <div class="kpi-value">$770</div>
+        <div class="kpi-desc">国内 ¥3,999 起<br>双徕卡 · 8K · 可拆屏</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-bar" style="background:var(--c-p4p)"></div>
+        <div class="kpi-label">大疆 Pocket 4P</div>
+        <div class="kpi-value">¥3,799</div>
+        <div class="kpi-desc">折合约 $525<br>双摄 · 17 档动态范围</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-bar" style="background:var(--c-p4)"></div>
+        <div class="kpi-label">大疆 Pocket 4</div>
+        <div class="kpi-value">$499</div>
+        <div class="kpi-desc">美国市场可购<br>单摄 · 4K 240fps</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-bar" style="background:var(--c-p3)"></div>
+        <div class="kpi-label">大疆 Pocket 3</div>
+        <div class="kpi-value">1000万+</div>
+        <div class="kpi-desc">累计销量<br>经典畅销款，已降价</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-bar" style="background:var(--c-feiyu)"></div>
+        <div class="kpi-label">Feiyu Pocket 4</div>
+        <div class="kpi-value">~€300</div>
+        <div class="kpi-desc">预算黑马<br>50MP · 450° 云台</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 市场格局 -->
+  <div class="section">
+    <div class="section-label">市场格局</div>
+    <h2>一家独大的时代结束了</h2>
+    <p class="section-intro">自 2018 年初代 Osmo Pocket 起，大疆几乎独占云台相机品类，Pocket 3 累计销量逾 1000 万台、营收超 200 亿元。2026 年，影石 Luna Ultra 成为多年来第一个真正的直接竞争者，分析师普遍认为品类正从「垄断」走向「1+N」。</p>
+    <div class="two-col">
+      <div class="chart-wrap">
+        <div class="chart-title">Pocket 3 累计销量里程碑（万台）</div>
+        <div class="chart-caption">来源：36Kr / 行业销售数据</div>
+        <div class="chart-container" style="height:240px"><canvas id="salesChart"></canvas></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">起售价对比（美元，含估算）</div>
+        <div class="chart-caption">Pocket 4P / Feiyu 按当前汇率折算，仅供参考</div>
+        <div class="chart-container" style="height:240px"><canvas id="priceChart"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-wrap" style="margin-top:14px">
+      <div class="chart-title">综合竞争力雷达图（0–100）</div>
+      <div class="chart-caption">维度：影像规格 · 防抖稳定 · AI 智能 · 硬件创新 · 生态配件 · 全球可购 · 性价比 — 评分为基于公开评测的主观综合判断</div>
+      <div class="chart-container" style="height:360px"><canvas id="radarChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ④ 竞品画像 -->
+  <div class="section">
+    <div class="section-label">竞品画像</div>
+    <h2>五款主力定位一览</h2>
+    <p class="section-intro">旗舰双摄两强对垒，主流单摄稳守基本盘，经典款拉低门槛，预算黑马搅局——四个层级覆盖几乎所有创作者人群。</p>
+    <div class="profile-grid">
+
+      <div class="profile-card">
+        <div class="profile-accent" style="background:var(--c-luna)"></div>
+        <div class="profile-name">影石 Insta360 Luna Ultra</div>
+        <div class="profile-sub">2026 年 6 月 10 日发布 · 旗舰双摄 · 徕卡联名</div>
+        <div class="profile-price">$770 <span style="font-size:15px;font-weight:400;color:var(--text-secondary)">/ ¥3,999 起</span></div>
+        <div class="profile-tags">
+          <span class="tag">双徕卡镜头</span><span class="tag">8K 30fps</span>
+          <span class="tag">可拆卸 OLED 屏</span><span class="tag">Deep Track 5.0</span>
+          <span class="tag">美国可购</span>
+        </div>
+        <div class="profile-summary">品类首款徕卡联名云台相机，1 英寸主摄（Sony LYT-900）+ 1/1.3 英寸长焦双摄，行业首创 2 英寸可拆卸 OLED 遥控屏（20m 图传），第一人称头追配件。发售即引发大疆专利诉讼，被多家媒体评价为「结束了大疆的垄断」。</div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-accent" style="background:var(--c-p4p)"></div>
+        <div class="profile-name">大疆 Osmo Pocket 4P</div>
+        <div class="profile-sub">2026 年 5 月戛纳亮相，中国已开预售 · 旗舰双摄</div>
+        <div class="profile-price">¥3,799 <span style="font-size:15px;font-weight:400;color:var(--text-secondary)">（约 $525）</span></div>
+        <div class="profile-tags">
+          <span class="tag">17 档动态范围</span><span class="tag">D-Log2</span>
+          <span class="tag">60mm 长焦</span><span class="tag">6K 60fps</span>
+          <span class="tag" style="background:#fff3e0;color:#b05000">美国无官方渠道</span>
+        </div>
+        <div class="profile-summary">大疆对位 Luna Ultra 的直接竞品。1 英寸主摄 + 1/1.28 英寸长焦，17 档动态范围与 D-Log2 在纸面规格上更专业。但因 FCC 限制无法进入美国市场，全球竞争存在显著地理短板；XTRA Muse 2 Pro 被认为是其规避监管的「换标」版本。</div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-accent" style="background:var(--c-p4)"></div>
+        <div class="profile-name">大疆 Osmo Pocket 4</div>
+        <div class="profile-sub">2026 年 4 月 16 日发布 · 主流单摄</div>
+        <div class="profile-price">$499 <span style="font-size:15px;font-weight:400;color:var(--text-secondary)">起</span></div>
+        <div class="profile-tags">
+          <span class="tag">1 英寸传感器</span><span class="tag">4K 240fps</span>
+          <span class="tag">107GB 内置存储</span><span class="tag">4 声道音频</span>
+          <span class="tag" style="background:#e3f5e8;color:#1a7a35">美国可购</span>
+        </div>
+        <div class="profile-summary">在 FCC 覆盖名单生效前已获认证，是大疆唯一能在美国正常发售的新品。比 Pocket 3 轻 35%、续航提升约 67%，内置 107GB 高速存储（800MB/s）与四声道空间音频。比 Luna Ultra 便宜 $270，是最直接的性价比对手。</div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-accent" style="background:var(--c-p3)"></div>
+        <div class="profile-name">大疆 Osmo Pocket 3</div>
+        <div class="profile-sub">2023 年发布 · 经典畅销款（现降价在售）</div>
+        <div class="profile-price">约 $359 <span style="font-size:15px;font-weight:400;color:var(--text-secondary)">（618 大幅降价）</span></div>
+        <div class="profile-tags">
+          <span class="tag">1 英寸传感器</span><span class="tag">4K 60fps</span>
+          <span class="tag">旋转屏</span><span class="tag">累销 1000万+</span>
+        </div>
+        <div class="profile-summary">定义品类的标志性产品，三年累计销量超 1000 万台、营收逾 200 亿元，长期供不应求。2026 年 618 大促直降 700 元后性价比极高，构成品类入门门槛，也是大疆守住市场份额的基本盘。</div>
+      </div>
+
+      <div class="profile-card" style="grid-column: 1 / -1;">
+        <div class="profile-accent" style="background:var(--c-feiyu)"></div>
+        <div class="profile-name">FeiyuTech Feiyu Pocket 4</div>
+        <div class="profile-sub">2026 上半年发布 · 预算黑马</div>
+        <div class="profile-price">~€300 <span style="font-size:15px;font-weight:400;color:var(--text-secondary)">（约 $320，预期价）</span></div>
+        <div class="profile-tags">
+          <span class="tag">50MP / 1·55″ 传感器</span><span class="tag">DCG HDR</span>
+          <span class="tag">2.64″ 近方形屏</span><span class="tag">450° 云台</span>
+          <span class="tag">64GB 内置</span><span class="tag">AI 追踪</span>
+        </div>
+        <div class="profile-summary">在两强对垒之外提供「够用且便宜」的第三选项。1/1.55 英寸 50MP 传感器、DCG HDR、行业领先的 2.64 英寸近方形屏、450° 超大云台转动范围（主流约 300°），以及滑动开关机兼护罩的创新设计。约为 DJI Pocket 4 价格的六成，瞄准价格敏感型创作者。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ⑤ 参数矩阵 -->
+  <div class="section">
+    <div class="section-label">参数矩阵</div>
+    <h2>关键规格横向对比</h2>
+    <p class="section-intro">同价位段，Luna Ultra 以双摄 + 8K + 可拆屏建立差异化；Pocket 4P 动态范围与色彩更专业但受地理限制；Pocket 4 性价比均衡；Feiyu 主打低价。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>参数</th>
+            <th>Luna Ultra <span style="color:var(--c-luna)">●</span></th>
+            <th>Pocket 4P <span style="color:var(--c-p4p)">●</span></th>
+            <th>Pocket 4 <span style="color:var(--c-p4)">●</span></th>
+            <th>Pocket 3 <span style="color:var(--c-p3)">●</span></th>
+            <th>Feiyu P4 <span style="color:var(--c-feiyu)">●</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>镜头系统</td>
+            <td>双摄：1″+1/1.3″<span class="badge">首发双摄</span></td>
+            <td>双摄：1″+1/1.28″</td>
+            <td>单摄：1″</td>
+            <td>单摄：1″</td>
+            <td>单摄：1/1.55″</td></tr>
+          <tr><td>主摄光圈</td>
+            <td>F1.8（20mm 等效）</td>
+            <td>F2.0（20mm 等效）</td>
+            <td>F1.7–2.8 可变</td>
+            <td>F1.8</td>
+            <td>—</td></tr>
+          <tr><td>变焦</td>
+            <td>6x 无损 / 12x 混合<span class="badge">领先</span></td>
+            <td>3x 光学（60mm）</td>
+            <td>2x 无损</td>
+            <td>2x 数字</td>
+            <td>—</td></tr>
+          <tr><td>最高视频</td>
+            <td>8K 30fps<span class="badge">领先</span></td>
+            <td>6K 60fps</td>
+            <td>4K 240fps</td>
+            <td>4K 60fps</td>
+            <td>4K 60fps</td></tr>
+          <tr><td>动态范围</td>
+            <td>14 档</td>
+            <td>17 档<span class="badge">领先</span></td>
+            <td>14 档</td>
+            <td>—</td>
+            <td>DCG HDR</td></tr>
+          <tr><td>色彩曲线</td>
+            <td>I-Log / ACES / 杜比视界</td>
+            <td>D-Log2<span class="badge">专业</span></td>
+            <td>10-bit D-Log M</td>
+            <td>10-bit D-Log M</td>
+            <td>—</td></tr>
+          <tr><td>防抖</td>
+            <td>三轴机械 + EIS</td>
+            <td>三轴机械</td>
+            <td>三轴机械</td>
+            <td>三轴机械</td>
+            <td>三轴机械（450° pan）</td></tr>
+          <tr><td>智能追踪</td>
+            <td>Deep Track 5.0<span class="badge">同类最佳</span></td>
+            <td>ActiveTrack</td>
+            <td>ActiveTrack</td>
+            <td>ActiveTrack 3.0</td>
+            <td>AI 追踪</td></tr>
+          <tr><td>屏幕</td>
+            <td>2″ OLED 可拆卸<span class="badge">行业首创</span></td>
+            <td>取景器遥控（选配）</td>
+            <td>旋转屏</td>
+            <td>旋转屏</td>
+            <td>2.64″ 近方形<span class="badge">最大</span></td></tr>
+          <tr><td>内置存储</td>
+            <td class="num">47GB（+microSD 1TB）</td>
+            <td>有（容量待确认）</td>
+            <td class="num">107GB<span class="badge">最大</span></td>
+            <td>—</td>
+            <td class="num">64GB</td></tr>
+          <tr><td>续航</td>
+            <td>约 4 小时（1550mAh）</td>
+            <td>待确认</td>
+            <td>约 3.5 小时</td>
+            <td>约 2 小时</td>
+            <td>约 150 分钟</td></tr>
+          <tr><td>重量</td>
+            <td class="num">约 233g</td>
+            <td>待确认</td>
+            <td>约 145g（轻 35%）</td>
+            <td>约 179g</td>
+            <td>待确认</td></tr>
+          <tr><td>美国市场</td>
+            <td><span class="badge badge-green">正式发售</span></td>
+            <td><span class="badge badge-warn">无官方渠道</span></td>
+            <td><span class="badge badge-green">正式发售</span></td>
+            <td><span class="badge badge-green">在售</span></td>
+            <td><span class="badge badge-gray">待定</span></td></tr>
+          <tr><td>起售价</td>
+            <td class="num">$770 / ¥3,999</td>
+            <td class="num">¥3,799（≈$525）</td>
+            <td class="num">$499</td>
+            <td class="num">≈$359</td>
+            <td class="num">≈€300</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-wrap" style="margin-top:14px">
+      <div class="chart-title">竞争定位图：价格 vs 影像综合规格</div>
+      <div class="chart-caption">气泡大小代表全球可购性（越大越容易买到）；Pocket 4P 因美国受限故气泡较小</div>
+      <div class="chart-container" style="height:320px"><canvas id="bubbleChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ⑥ 波特五力 -->
+  <div class="section">
+    <div class="section-label">行业吸引力</div>
+    <h2>波特五力分析</h2>
+    <p class="section-intro">云台相机正处于高速增长但竞争骤然加剧的阶段。手机厂商虎视眈眈、替代威胁上升，使这个曾经的「蓝海」迅速红海化。评分越高代表对在位者的压力越大。</p>
+    <div class="porter-wrap table-wrap">
+      <table class="porter-table">
+        <thead>
+          <tr><th style="width:22%">五种力量</th><th style="width:50%">评估要点</th><th>压力强度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>新进入者威胁</td><td>OPPO、vivo（200+ 人团队）、荣耀、佳能、Looki 等密集入场；手机厂商可借供应链与资本壁垒快速搅局</td><td><span class="force-score" data-n="5"></span></td></tr>
+          <tr><td>供应商议价力</td><td>核心传感器集中于索尼 / 豪威，徕卡等光学品牌成稀缺背书资源；头部厂商可前向整合</td><td><span class="force-score" data-n="3"></span></td></tr>
+          <tr><td>买方议价力</td><td>消费者转换成本低、价格敏感；618 价格战使买方获得更多议价空间</td><td><span class="force-score" data-n="4"></span></td></tr>
+          <tr><td>替代品威胁</td><td>旗舰手机影像、可穿戴 AI 相机、运动相机持续蚕食轻度创作需求</td><td><span class="force-score" data-n="4"></span></td></tr>
+          <tr><td>行业竞争强度</td><td>大疆与影石全线开战（云台 / 全景 / 无人机），并互相发起专利诉讼；增速虽快但已进入存量博弈</td><td><span class="force-score" data-n="5"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ⑦ 蓝海策略 -->
+  <div class="section">
+    <div class="section-label">蓝海策略分析</div>
+    <h2>影石 Luna Ultra 的破局路径</h2>
+    <p class="section-intro">面对大疆五年的品类积累，影石没有在既有规则下内卷，而是引入徕卡光学、首创可拆卸屏，重新定义旗舰云台相机的价值标准。</p>
+    <div class="blueocean-grid">
+      <div class="bo-card"><div class="bo-icon">🗑</div><div class="bo-action">消除</div>
+        <ul class="bo-items"><li>对外接屏 / 手机监看的依赖</li><li>单摄构图局限</li><li>专业影像与消费相机的壁垒</li></ul></div>
+      <div class="bo-card"><div class="bo-icon">↓</div><div class="bo-action">减少</div>
+        <ul class="bo-items"><li>专业色彩门槛（内置 ACES）</li><li>配件依赖（内置 47GB）</li><li>单人创作操作难度</li></ul></div>
+      <div class="bo-card"><div class="bo-icon">↑</div><div class="bo-action">提升</div>
+        <ul class="bo-items"><li>分辨率至 8K 30fps</li><li>追踪至 Deep Track 5.0</li><li>快充（23 分钟充 80%）</li><li>徕卡色彩与滤镜</li></ul></div>
+      <div class="bo-card"><div class="bo-icon">✦</div><div class="bo-action">创造</div>
+        <ul class="bo-items"><li>可拆卸 OLED 遥控屏</li><li>第一人称头追模块</li><li>屏 + 遥控 + 麦三合一</li><li>20m 图传远程拍摄</li></ul></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 结论与建议 -->
+  <div class="section">
+    <div class="section-label">结论与建议</div>
+    <h2>一句话总结与关键洞察</h2>
+    <p class="section-intro">购买决策很大程度上取决于地域、预算与对双摄 / 长焦的需求；竞争胜负则越来越取决于生态与可购性，而非单纯参数。</p>
+    <div class="conclusion-grid">
+      <div class="conclusion-card"><div class="pname"><span class="dot" style="background:var(--c-luna)"></span>影石 Luna Ultra</div>
+        <p>当前全球唯一可正式购买的双摄云台旗舰，可拆卸遥控屏击中真实创作痛点，发售即售罄。但 $770 定价偏高，且作为第一代产品存在手动云台偏生硬、无法 360° 旋转、长时间 8K 发热等瑕疵。</p></div>
+      <div class="conclusion-card"><div class="pname"><span class="dot" style="background:var(--c-p4p)"></span>大疆 Pocket 4P</div>
+        <p>纸面规格最强（17 档动态范围、D-Log2、6K 60fps），中国及非美市场专业创作者首选。FCC 限制是最大短板，全球可购性存疑；美国买家只能寄望换标的 XTRA Muse 2 Pro。</p></div>
+      <div class="conclusion-card"><div class="pname"><span class="dot" style="background:var(--c-p4)"></span>大疆 Pocket 4</div>
+        <p>$499 起、美国可购、4K 240fps、107GB 内置存储，性价比最均衡。不需要双摄的创作者无需为 Luna Ultra 多付 $270，是「稳妥之选」。</p></div>
+      <div class="conclusion-card"><div class="pname"><span class="dot" style="background:var(--c-p3)"></span>大疆 Pocket 3</div>
+        <p>品类开创者与销量冠军，1000 万台是其护城河，618 降价后成为入门最低门槛。轻度创作者用旋转屏 + 1 英寸传感器至今够用，不必追新。</p></div>
+      <div class="conclusion-card" style="grid-column:1 / -1;"><div class="pname"><span class="dot" style="background:var(--c-feiyu)"></span>FeiyuTech Pocket 4</div>
+        <p>约六成价格提供「够用」体验：50MP 传感器、最大屏幕、450° 云台。低光、外接麦克风等实拍表现仍待验证，但对预算敏感、入门尝鲜的创作者是极具吸引力的搅局者。</p></div>
+    </div>
+
+    <div class="insight-list">
+      <h3>关键洞察</h3>
+      <div class="insight-item"><span class="insight-num">01</span>
+        <span><strong>监管壁垒比参数更深刻地重塑格局。</strong>大疆因 FCC 限制无法在美国发售 Pocket 4P，使 Luna Ultra 成为美国市场唯一的双摄旗舰，短期独享真空红利。媒体观点正从「谁参数更强」转向「谁的生态更可靠、更买得到」。</span></div>
+      <div class="insight-item"><span class="insight-num">02</span>
+        <span><strong>品类进入「1+N」时代，手机厂商是最大变量。</strong>OPPO、vivo（200+ 人团队）、荣耀（AI 概念机内置可展开云台摄像头）、佳能、Looki 等密集立项。它们掌握供应链、资本与「手机即入口」的天然优势，未来 3–5 年格局或被彻底改写。</span></div>
+      <div class="insight-item"><span class="insight-num">03</span>
+        <span><strong>徕卡联名是影石的高明落子，也是其压力所在。</strong>品牌溢价撑起了 $770 的定价空间，但第一代产品的稳定性与影像口碑正接受审视。双雄已在云台、全景、无人机三条战线互诉专利——这场缠斗的最终赢家，可能是享受到价格战与创新红利的消费者。</span></div>
+    </div>
+  </div>
+
+  <!-- ⑨ 数据来源 -->
+  <div class="sources">
+    <strong>数据来源</strong> · Insta360 / DJI / FeiyuTech 官方发布资料 · Engadget · DPReview · Digital Camera World · Stuff.tv · New Atlas · Android Authority · Notebookcheck · RedShark News · Geeky Gadgets · BigGo Finance · T3 · 36Kr · GlobeNewswire。数据截止 2026 年 6 月 23 日。部分大疆 Pocket 4P 与 Feiyu Pocket 4 规格 / 定价仍处预售或预告阶段，折算价格按当时汇率估算，最终以官方公告为准。
+  </div>
+
+</div>
+
+<script>
+  Chart.defaults.color = '#86868b';
+  Chart.defaults.borderColor = '#e5e5e5';
+  Chart.defaults.font.family = "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif";
+
+  // 销量里程碑
+  new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
+    data: {
+      labels: ['2023 发布', '2024', '2025', '2026 初'],
+      datasets: [{
+        data: [80, 400, 750, 1000],
+        backgroundColor: ['#d2d2d7', '#b5b5ba', '#7d93b8', '#2d5a8e'],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: '#f0f0f0' }, ticks: { callback: v => v + '万' } }
+      }
+    }
+  });
+
+  // 价格对比
+  new Chart(document.getElementById('priceChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Feiyu P4', 'Pocket 3', 'Pocket 4', 'Pocket 4P', 'Luna Ultra'],
+      datasets: [{
+        data: [320, 359, 499, 525, 770],
+        backgroundColor: ['#b06a3a', '#a8a8ad', '#6e6e73', '#2b2b2d', '#2d5a8e'],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#f0f0f0' }, ticks: { callback: v => '$' + v } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+
+  // 雷达图
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['影像规格', '防抖稳定', 'AI 智能', '硬件创新', '生态配件', '全球可购', '性价比'],
+      datasets: [
+        { label: 'Luna Ultra', data: [90,85,90,95,78,92,62],
+          borderColor: '#2d5a8e', backgroundColor: 'rgba(45,90,142,0.12)', borderWidth: 2, pointRadius: 3 },
+        { label: 'Pocket 4P', data: [96,86,82,76,85,35,78],
+          borderColor: '#2b2b2d', backgroundColor: 'rgba(43,43,45,0.08)', borderWidth: 2, pointRadius: 3 },
+        { label: 'Pocket 4', data: [78,86,80,70,88,85,88],
+          borderColor: '#6e6e73', backgroundColor: 'rgba(110,110,115,0.07)', borderWidth: 2, pointRadius: 3 },
+        { label: 'Pocket 3', data: [66,84,68,60,90,88,95],
+          borderColor: '#a8a8ad', backgroundColor: 'rgba(168,168,173,0.06)', borderWidth: 1.5, pointRadius: 2, borderDash: [4,3] },
+        { label: 'Feiyu P4', data: [55,72,65,72,55,60,92],
+          borderColor: '#b06a3a', backgroundColor: 'rgba(176,106,58,0.07)', borderWidth: 2, pointRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 18, font: { size: 12 } } } },
+      scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 10 } },
+        grid: { color: '#ebebeb' }, pointLabels: { font: { size: 12, weight: '500' } } } }
+    }
+  });
+
+  // 气泡图
+  new Chart(document.getElementById('bubbleChart'), {
+    type: 'bubble',
+    data: {
+      datasets: [
+        { label: 'Luna Ultra', data: [{ x: 770, y: 88, r: 22 }], backgroundColor: 'rgba(45,90,142,0.7)', borderColor: '#2d5a8e' },
+        { label: 'Pocket 4P', data: [{ x: 525, y: 94, r: 9 }], backgroundColor: 'rgba(43,43,45,0.6)', borderColor: '#2b2b2d' },
+        { label: 'Pocket 4', data: [{ x: 499, y: 80, r: 20 }], backgroundColor: 'rgba(110,110,115,0.6)', borderColor: '#6e6e73' },
+        { label: 'Pocket 3', data: [{ x: 359, y: 68, r: 26 }], backgroundColor: 'rgba(168,168,173,0.5)', borderColor: '#a8a8ad' },
+        { label: 'Feiyu P4', data: [{ x: 320, y: 55, r: 14 }], backgroundColor: 'rgba(176,106,58,0.55)', borderColor: '#b06a3a' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 18, font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => {
+          const d = ctx.raw; return ` ${ctx.dataset.label}  价格 $${d.x}  影像评分 ${d.y}/100`; } } }
+      },
+      scales: {
+        x: { title: { display: true, text: '起售价（美元，含估算）', font: { size: 13 } }, min: 260, max: 880, grid: { color: '#f0f0f0' } },
+        y: { title: { display: true, text: '影像综合规格评分', font: { size: 13 } }, min: 45, max: 100, grid: { color: '#f0f0f0' } }
+      }
+    }
+  });
+
+  // 波特五力 — 渲染评分点
+  document.querySelectorAll('.force-score').forEach(el => {
+    const n = parseInt(el.dataset.n, 10);
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'force-dot' + (i <= n ? ' on' : '');
+      el.appendChild(dot);
+    }
+  });
+</script>
+</body>
+</html>

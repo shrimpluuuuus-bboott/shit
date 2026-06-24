@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苹果 WWDC26 · 软件发布会深度调研</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root{
+  --bg:#fff;--card-bg:#f5f5f7;--text:#1d1d1f;--text-secondary:#86868b;
+  --border:#d2d2d7;--line:#e8e8ea;--accent:#0071e3;--brand:#1d1d1f;
+  --up:#1f6b43;--up-bg:#e7f1ea;--down:#9a4f2e;--down-bg:#f5e7e0;
+  --flat:#6b6b70;--flat-bg:#eeeeef;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue','PingFang SC',sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
+.tnum{font-variant-numeric:tabular-nums;}
+h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+h3{font-size:16px;font-weight:600;margin-bottom:6px;}
+p{margin-bottom:10px;}
+.sec-sub{color:var(--text-secondary);font-size:13px;margin:0 0 16px;}
+.sec{padding:36px 0;border-top:1px solid var(--line);}
+.sec:first-child{border-top:none;}
+.hint{font-size:12px;color:var(--accent);font-weight:500;}
+
+/* TABS */
+.tabs{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;padding:0 22px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:13px 18px;border:none;background:none;cursor:pointer;font-size:14px;
+  font-weight:500;color:var(--text-secondary);border-bottom:2.5px solid transparent;
+  white-space:nowrap;transition:color .15s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--text);border-bottom-color:var(--brand);font-weight:600;}
+.pane{display:none;}.pane.active{display:block;}
+
+/* TOOLTIP */
+.rated{position:relative;cursor:help;border-bottom:1px dotted var(--border);display:inline-block;max-width:100%;}
+.rated .tip{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(4px);
+  width:240px;white-space:normal;word-break:break-all;
+  background:#1d1d1f;color:#fff;font-size:12px;line-height:1.55;text-align:left;
+  padding:10px 12px;border-radius:9px;opacity:0;visibility:hidden;
+  transition:opacity .18s ease,transform .18s ease;z-index:9999;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.22);font-weight:400;letter-spacing:0;}
+.rated .tip b{color:#ffd9a8;font-weight:600;}
+.rated .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:#1d1d1f;}
+.rated:hover .tip,.rated:focus .tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.rated.tip-right .tip{left:0;transform:translateX(0) translateY(4px);}
+.rated.tip-right:hover .tip{transform:translateX(0) translateY(0);}
+.rated.tip-left .tip{left:auto;right:0;transform:translateX(0) translateY(4px);}
+.rated.tip-left:hover .tip{transform:translateX(0) translateY(0);}
+
+/* DELTA */
+.delta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+  padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.delta .ico{font-size:10px;line-height:1;}
+.delta.up{color:var(--up);background:var(--up-bg);}
+.delta.down{color:var(--down);background:var(--down-bg);}
+.delta.flat{color:var(--flat);background:var(--flat-bg);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.card{background:var(--card-bg);border-radius:12px;padding:18px 20px;}
+.card .l{font-size:11px;color:var(--text-secondary);margin-bottom:5px;}
+.card .v{font-size:18px;font-weight:600;line-height:1.2;}
+.card .v small{font-size:12px;font-weight:400;color:var(--text-secondary);}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{text-align:left;padding:10px 14px;border-bottom:2px solid var(--text);
+  font-weight:600;font-size:12px;color:var(--text-secondary);}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.diff td:first-child{color:var(--text-secondary);width:130px;font-weight:500;}
+.diff tr.c{background:#fbfbfa;}
+.impact{color:var(--text-secondary);font-size:12px;display:block;margin-top:3px;}
+
+/* HERO */
+.hero-top{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:center;margin-bottom:20px;}
+.brand-tag{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:10px;display:block;}
+.h1{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1.08;margin-bottom:10px;}
+.oneline{font-size:15px;margin-bottom:0;}
+.hero-visual svg{width:100%;height:auto;display:block;border-radius:14px;}
+.img-caption{font-size:12px;color:var(--text-secondary);margin-top:5px;text-align:center;}
+.stars{background:var(--card-bg);border-radius:12px;padding:14px;margin-top:12px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.si{text-align:center;}
+.si .dim{font-size:11px;color:var(--text-secondary);margin-bottom:4px;}
+.si .s{font-size:13px;letter-spacing:1px;color:var(--brand);}
+.si .off{color:var(--border);}
+
+/* TOP5 */
+.top5{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.up-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;display:flex;gap:14px;}
+.up-card .num{font-size:26px;font-weight:700;color:var(--accent);line-height:1;min-width:28px;}
+.up-card .ttl{font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;}
+.up-card .txt{font-size:13px;color:var(--text-secondary);line-height:1.45;}
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;
+  background:#eceae4;color:var(--text);white-space:nowrap;cursor:help;position:relative;}
+.badge.new{background:#e7f1ea;color:var(--up);}
+.badge .tip{white-space:normal;word-break:break-all;}
+
+/* AI CARDS */
+.ai-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;}
+.ai-card h3{font-size:13px;margin-bottom:7px;}
+.ai-card ul{list-style:none;}
+.ai-card li{font-size:12.5px;color:var(--text-secondary);line-height:1.45;padding:3px 0 3px 14px;position:relative;}
+.ai-card li::before{content:'·';position:absolute;left:3px;color:var(--accent);font-weight:700;}
+.ai-card p{font-size:12.5px;color:var(--text-secondary);margin:0;line-height:1.55;}
+
+/* CHANGE COLS */
+.ch{background:var(--card-bg);border-radius:12px;padding:16px 18px;}
+.ch .hd{font-weight:600;font-size:14px;margin-bottom:10px;}
+.ch.upc .hd{color:var(--up);}.ch.downc .hd{color:var(--down);}.ch.flatc .hd{color:var(--flat);}
+.ch li{list-style:none;font-size:12.5px;color:var(--text-secondary);line-height:1.45;
+  padding:5px 0;border-bottom:1px solid var(--line);}
+.ch li:last-child{border-bottom:none;}.ch li b{color:var(--text);font-weight:600;}
+
+/* CHART */
+.chart-box{background:var(--card-bg);border-radius:12px;padding:18px 20px;}
+.chart-wrap{position:relative;height:260px;}
+.basis-tbl td:first-child{width:110px;color:var(--text);font-weight:500;}
+.basis-tbl td:nth-child(2){width:52px;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;}
+.basis-tbl td:nth-child(3){color:var(--text-secondary);font-size:12.5px;}
+
+/* SWOT */
+.sw .hd{font-weight:600;font-size:13px;margin-bottom:8px;}
+.sw.s .hd{color:var(--up);}.sw.w .hd{color:var(--down);}.sw.o .hd{color:var(--accent);}.sw.r .hd{color:#8a6d3b;}
+.sw li{list-style:none;font-size:12.5px;color:var(--text-secondary);line-height:1.45;padding:3px 0 3px 13px;position:relative;}
+.sw li::before{content:'';position:absolute;left:2px;top:10px;width:4px;height:4px;border-radius:50%;background:var(--border);}
+
+/* COMPAT (软件模式专有) */
+.compat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.compat-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;}
+.compat-card .hd{font-weight:600;font-size:14px;margin-bottom:8px;}
+.compat-card.ok .hd{color:var(--up);}
+.compat-card.limit .hd{color:var(--down);}
+.compat-card li{list-style:none;font-size:12.5px;color:var(--text-secondary);line-height:1.5;padding:3px 0 3px 13px;position:relative;}
+.compat-card li::before{content:'';position:absolute;left:2px;top:10px;width:4px;height:4px;border-radius:50%;background:var(--border);}
+
+/* DETAILS */
+details{background:var(--card-bg);border-radius:12px;padding:4px 20px;}
+summary{cursor:pointer;font-weight:600;font-size:14px;padding:12px 0;list-style:none;display:flex;align-items:center;gap:6px;}
+summary::-webkit-details-marker{display:none;}
+summary::before{content:'▸';color:var(--accent);transition:transform .2s;}
+details[open] summary::before{transform:rotate(90deg);}
+details td:first-child{color:var(--text-secondary);width:150px;}
+
+/* OVERVIEW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi{background:var(--card-bg);border-radius:12px;padding:16px;text-align:center;}
+.kpi .num{font-size:22px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;}
+.kpi .desc{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+.hl{background:var(--card-bg);border-radius:12px;padding:18px 20px;}
+.hl .rank{font-size:24px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.hl .title{font-weight:600;font-size:15px;margin-bottom:3px;}
+.hl .sub{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+.eco-card{background:var(--card-bg);border-radius:12px;padding:16px 18px;}
+.eco-card .pair{font-weight:600;font-size:13px;margin-bottom:5px;}
+.eco-card .feat{list-style:none;}
+.eco-card .feat li{font-size:12.5px;color:var(--text-secondary);padding:2px 0 2px 13px;position:relative;line-height:1.45;}
+.eco-card .feat li::before{content:'◆';position:absolute;left:0;font-size:8px;color:var(--accent);top:5px;}
+
+/* NAV */
+.nav-btns{display:flex;justify-content:space-between;margin-top:32px;padding-top:16px;border-top:1px solid var(--line);}
+.nav-btn{background:var(--card-bg);border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text);}
+.nav-btn:hover{background:var(--line);}
+
+footer{padding:28px 0 56px;border-top:1px solid var(--line);}
+footer p{font-size:12px;color:var(--text-secondary);line-height:1.65;margin-bottom:5px;}
+
+@media(max-width:768px){
+  .hero-top,.g2,.g3,.g4,.kpi-row,.top5,.compat-grid{grid-template-columns:1fr;}
+  .stars{grid-template-columns:repeat(3,1fr);}
+  .h1{font-size:26px;}
+  .sec{padding:28px 0;}
+  .rated .tip{width:200px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="tabs" id="tabNav">
+  <button class="tab active" data-tab="0">📋 总览</button>
+  <button class="tab" data-tab="1">📱 iOS 27 <span style="font-size:10px;background:#e7f1ea;color:#1f6b43;padding:1px 6px;border-radius:8px;margin-left:4px;">完整版</span></button>
+  <button class="tab" data-tab="2">🖥️ macOS 27</button>
+  <button class="tab" data-tab="3">🥽 visionOS 27</button>
+  <button class="tab" data-tab="4">🧠 AI & Siri</button>
+</nav>
+
+<!-- ════ TAB 0 总览 ════ -->
+<div class="pane active" id="pane0">
+<div class="wrap">
+
+<div class="sec" style="border-top:none;padding-top:40px;">
+  <span class="brand-tag">Apple · WWDC26 · 软件发布会深度调研</span>
+  <div class="h1" style="font-size:34px;">WWDC 2026</div>
+  <p style="color:var(--text-secondary);font-size:15px;margin-top:10px;">
+    2026 年 6 月 8 日（北京时间 6/9 凌晨）· Apple Park · 苹果创立 50 周年<br>
+    <span style="font-size:13px;">核心主线：Apple Intelligence + 重构 Siri，全平台系统统一升级至 27 代，隐私优先端云 AI 架构。库克作为 CEO 主持的最后一届 WWDC。</span>
+  </p>
+  <p style="font-size:12px;color:var(--accent);margin-top:8px;">📌 本场为<strong>软件发布会</strong>，无硬件新品 —— 报告采用软件模式：以功能 Diff、兼容机型、上线节奏替代硬件的参数/价格/配色。</p>
+</div>
+
+<div class="sec">
+  <h2>本场核心数字</h2>
+  <div class="kpi-row">
+    <div class="kpi"><div class="num">6</div><div class="desc">系统统一升至 27 代</div></div>
+    <div class="kpi"><div class="num">+30%</div><div class="desc">iOS 27 应用启动提速</div></div>
+    <div class="kpi"><div class="num">Gemini</div><div class="desc">Siri 联手谷歌重构</div></div>
+    <div class="kpi"><div class="num">2026秋</div><div class="desc">正式版免费推送</div></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>今日最大看点</h2>
+  <p class="sec-sub">3 个最影响用户与行业的关键信息。</p>
+  <div class="g3">
+    <div class="hl">
+      <div class="rank">🥇</div>
+      <div class="title">Siri 史诗级重构，联手谷歌 Gemini</div>
+      <div class="sub">苹果放下完全自研执念，与谷歌联合定制基于 Gemini 的 Apple Foundation Models，采用端侧 + 私有云双架构。Siri 从语音工具升级为跨设备智能中枢，是苹果 AI 追赶竞品的核心抓手。</div>
+    </div>
+    <div class="hl">
+      <div class="rank">🥈</div>
+      <div class="title">全平台统一升级至 27 代</div>
+      <div class="sub">iOS/iPadOS/macOS/watchOS/visionOS/tvOS 全部升至 27。去年液态玻璃争议后，今年重点放在系统优化与细节打磨，应用启动提速最高 30%，「液态玻璃」新增透明度可调滑块。</div>
+    </div>
+    <div class="hl">
+      <div class="rank">🥉</div>
+      <div class="title">隐私优先的端云 AI 架构</div>
+      <div class="sub">AI 请求数据仅单次使用、不留存、不共享第三方。但受地区法规限制，中国大陆、欧盟初期暂不开放全套 AI 能力，macOS 27 之后 Intel Mac 终止主线更新。</div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>系统升级清单</h2>
+  <p class="sec-sub">本场全部发布内容（软件模式：以版本号 + 上线节奏替代价格表）。</p>
+  <table>
+    <thead><tr><th>名称</th><th>类型</th><th>版本</th><th>一句话看点</th><th>报告深度</th></tr></thead>
+    <tbody>
+      <tr><td>iOS 27</td><td>手机系统</td><td>27</td><td>液态玻璃可调 + 启动提速 30% + Siri 重构</td><td><span style="color:var(--up);font-weight:600;">完整版 8 段</span></td></tr>
+      <tr><td>macOS 27</td><td>电脑系统</td><td>Golden Gate</td><td>Siri 进聚焦搜索 + 清退 Intel</td><td>精简版</td></tr>
+      <tr><td>visionOS 27</td><td>头显系统</td><td>27</td><td>空间重构图 + AI 生成补全</td><td>精简版</td></tr>
+      <tr><td>Apple Intelligence + Siri</td><td>AI 平台</td><td>—</td><td>联手 Gemini 重构，跨设备智能中枢</td><td>精简版</td></tr>
+      <tr><td>iPadOS 27</td><td>平板系统</td><td>27</td><td>同代系统升级（并入总览简述）</td><td>—（未单列）</td></tr>
+      <tr><td>watchOS 27</td><td>手表系统</td><td>27</td><td>同代系统升级（并入总览简述）</td><td>—（未单列）</td></tr>
+      <tr><td>tvOS 27</td><td>电视系统</td><td>27</td><td>同代系统升级（并入总览简述）</td><td>—（未单列）</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">iPadOS / watchOS / tvOS 27 主要为同代体验同步升级，未单列页面；如需单独深入可另行生成。</p>
+</div>
+
+<div class="sec">
+  <h2>跨平台体验联动</h2>
+  <p class="sec-sub">软件模式下，「联动」指跨设备/跨平台的体验打通——这正是本届 WWDC 核心看点。</p>
+  <div class="g3">
+    <div class="eco-card">
+      <div class="pair">🧠 Siri 跨设备接续</div>
+      <ul class="feat">
+        <li>iPhone / Mac / Vision Pro 之间延续同一段对话</li>
+        <li>iCloud 同步对话记录，无缝接力</li>
+        <li>跨 App 复杂任务（写消息、整理相册、批量处理文件）</li>
+      </ul>
+    </div>
+    <div class="eco-card">
+      <div class="pair">🔍 Siri ⟷ 聚焦搜索</div>
+      <ul class="feat">
+        <li>macOS 端 Siri 整合进 Spotlight 搜索栏</li>
+        <li>直接输入问题让 Siri 调用大模型回答</li>
+        <li>右键文件让 AI 引用其内容生成</li>
+      </ul>
+    </div>
+    <div class="eco-card">
+      <div class="pair">📷 视觉智能扩展</div>
+      <ul class="feat">
+        <li>向 Siri 展示图片并提问（视觉智能扩到更多设备）</li>
+        <li>Safari 按主题自动整理标签页</li>
+        <li>Siri 监控网页变化，内容更新时提醒</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div></div>
+
+<!-- ════ TAB 1 iOS 27（完整版 8 段）════ -->
+<div class="pane" id="pane1">
+<div class="wrap">
+
+<!-- ① HERO -->
+<div class="sec" style="border-top:none;padding-top:36px;">
+  <div class="hero-top">
+    <div>
+      <span class="brand-tag">Apple · 手机系统 · 完整版</span>
+      <div class="h1">iOS 27</div>
+      <p class="oneline">去年液态玻璃争议后的「细节打磨之年」——透明度可自由调节、应用启动最高提速 <strong>30%</strong>、Siri 重构，且支持所有能跑 iOS 26 的机型，老用户无需换机。</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="360" fill="#f0f0f2" rx="14"/>
+        <rect x="90" y="30" width="120" height="300" rx="24" fill="#1d1d1f"/>
+        <rect x="98" y="46" width="104" height="268" rx="18" fill="#0a0a0a"/>
+        <rect x="106" y="54" width="88" height="252" rx="14" fill="url(#g)"/>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4a90d9" stop-opacity="0.5"/>
+          <stop offset="1" stop-color="#b06ab3" stop-opacity="0.5"/></linearGradient></defs>
+        <rect x="118" y="80" width="64" height="40" rx="10" fill="#fff" fill-opacity="0.35"/>
+        <rect x="118" y="130" width="64" height="40" rx="10" fill="#fff" fill-opacity="0.25"/>
+        <rect x="118" y="180" width="64" height="40" rx="10" fill="#fff" fill-opacity="0.18"/>
+        <circle cx="150" cy="40" r="4" fill="#3a3a3c"/>
+        <text x="150" y="334" text-anchor="middle" fill="#86868b" font-size="11" font-family="sans-serif">液态玻璃示意 · 非官方</text>
+      </svg>
+      <p class="img-caption">示意图，非官方截图</p>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card"><div class="l">发布</div><div class="v">2026.6.8</div></div>
+    <div class="card"><div class="l">版本</div><div class="v">iOS 27</div></div>
+    <div class="card"><div class="l">上线节奏</div><div class="v" style="font-size:13px;">测试版6月<br>正式版秋季</div></div>
+    <div class="card"><div class="l">适用人群</div><div class="v" style="font-size:13px;">所有 iOS 26<br>机型用户（免费）</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+    <h3>核心评分（软件维度）</h3><span class="hint">💡 悬停看依据</span>
+  </div>
+  <div class="stars">
+    <div class="si"><div class="dim">实用性</div>
+      <span class="rated tip-right" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>实用性 4★</b>：启动提速 30%、通知动态更新、搜索重建索引都是高频可感知的体验升级；扣 1★ 因多为优化而非全新能力。</span></span></div>
+    <div class="si"><div class="dim">创新性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★<span class="off">★★</span></span>
+        <span class="tip"><b>创新性 3★</b>：今年主打"细节打磨"而非大突破，液态玻璃透明度滑块是对去年争议的修补；相比 iOS 26 的液态玻璃首发，创新幅度明显收敛，故 3★。</span></span></div>
+    <div class="si"><div class="dim">兼容性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>兼容性 5★</b>：支持所有能运行 iOS 26 的机型，无机型砍掉，老用户无需换机即可升级。这是本代兼容策略的最大亮点。</span></span></div>
+    <div class="si"><div class="dim">AI 能力</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>AI 4★</b>：Siri 重构 + 视觉智能 + 自然语言快捷指令，AI 能力大幅提升；扣 1★ 因中国大陆/欧盟初期不可用，且部分功能有每日上限。</span></span></div>
+    <div class="si"><div class="dim">隐私</div>
+      <span class="rated tip-left" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>隐私 5★</b>：AI 请求数据单次使用、不留存、不共享第三方，端侧优先、私有云兜底。儿童安全管控大幅扩展。隐私是苹果一贯护城河，故 5★。</span></span></div>
+  </div>
+</div>
+
+<!-- ② TOP5 -->
+<div class="sec">
+  <h2>🚀 本代升级 Top 5</h2>
+  <p class="sec-sub">相比 iOS 26 的核心新功能。<span class="hint">💡 悬停标签看新增/升级依据</span></p>
+  <div class="top5">
+    <div class="up-card"><div class="num">①</div><div>
+      <div class="ttl">Siri 重构（端云双架构）
+        <span class="rated badge new" tabindex="0">新增
+          <span class="tip"><b>新增依据</b>：iOS 26 的 Siri 仍以规则/轻量模型为主；iOS 27 接入联合谷歌定制的 Gemini 基础模型，支持长上下文多轮对话、跨 App 复杂任务，是质变级重构。</span>
+        </span></div>
+      <div class="txt">独立 App 界面（类 ChatGPT 对话窗），跨设备接续对话。</div></div></div>
+    <div class="up-card"><div class="num">②</div><div>
+      <div class="ttl">应用启动提速最高 30%
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：iOS 27 更新 CPU 调度器、优化多任务处理，官方称应用启动最高提速 30%。这是对去年用户反馈"卡顿/发热"的直接回应。</span>
+        </span></div>
+      <div class="txt">更新 CPU 调度器，改善多任务，老机型也受益。</div></div></div>
+    <div class="up-card"><div class="num">③</div><div>
+      <div class="ttl">液态玻璃透明度可调
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：iOS 26 液态玻璃因可读性差引发争议；iOS 27 重做底层渲染并新增"专属滑块"，可在「极致清晰↔完全着色」间自由调节，修补争议。</span>
+        </span></div>
+      <div class="txt">新增透明度滑块，应用图标更接近 3D 液态玻璃风格。</div></div></div>
+    <div class="up-card"><div class="num">④</div><div>
+      <div class="ttl">通知动态更新 + 搜索重建
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：同一 App 通知不再简单堆叠——快递/导航类在单条通知内动态更新；同时重建设备端搜索索引，优化 App/信息/文件/邮件搜索。</span>
+        </span></div>
+      <div class="txt">快递导航单条动态更新，端侧搜索更准更快。</div></div></div>
+    <div class="up-card"><div class="num">⑤</div><div>
+      <div class="ttl">儿童安全大幅扩展
+        <span class="rated badge new" tabindex="0">新增
+          <span class="tip"><b>新增依据</b>：iOS 27 新增 Ask to Browse（看新网站要申请）、Ask to Buy（13岁以下默认开启）、时间配额（限制单 App 使用时长），家长可随时把账户转为儿童账户。</span>
+        </span></div>
+      <div class="txt">家长管控从"装哪些 App"扩展到"上哪些网"。</div></div></div>
+    <div class="up-card"><div class="num">＋</div><div>
+      <div class="ttl">视觉智能 + Safari AI
+        <span class="rated badge" tabindex="0">升级
+          <span class="tip"><b>升级依据</b>：视觉智能扩展到更多设备（向 Siri 展示图片提问）；Safari 新增按主题自动整理标签页、Siri 监控网页变化提醒，均为 iOS 26 没有的 AI 能力。</span>
+        </span></div>
+      <div class="txt">图片提问、标签页智能整理、网页变化提醒。</div></div></div>
+  </div>
+</div>
+
+<!-- ③ 功能 DIFF -->
+<div class="sec">
+  <h2>📊 功能 Diff</h2>
+  <p class="sec-sub">vs 上代 iOS 26。▲新增/升级、＝延续优化、▼移除/收缩。</p>
+  <table class="diff">
+    <thead><tr><th>维度</th><th>iOS 26（上代）</th><th>iOS 27</th><th>变化与影响</th></tr></thead>
+    <tbody>
+      <tr class="c"><td>Siri / AI</td><td>轻量模型，能力有限</td><td>联手 Gemini 重构，端云双架构</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：从语音工具变智能中枢，是本代最大跃升</span></td></tr>
+      <tr class="c"><td>性能</td><td>iOS 26 基准</td><td>启动提速最高 30%</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：高频可感知，老机型也受益</span></td></tr>
+      <tr class="c"><td>液态玻璃</td><td>首发，可读性受争议</td><td>透明度可调 + 渲染重做</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：修补去年争议，可读性改善</span></td></tr>
+      <tr class="c"><td>通知</td><td>同 App 简单堆叠</td><td>单条动态更新</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：快递/导航类通知体验明显改善</span></td></tr>
+      <tr class="c"><td>儿童安全</td><td>基础家长控制</td><td>Ask to Browse/Buy + 时间配额</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：有娃家庭强相关，管控粒度大幅细化</span></td></tr>
+      <tr><td>设备端搜索</td><td>常规索引</td><td>重建索引，更准更快</td>
+        <td><span class="delta flat"><span class="ico">＝</span>优化</span><span class="impact">底层优化，体验渐进改善，非颠覆</span></td></tr>
+      <tr class="c"><td>地区可用性</td><td>AI 功能受限</td><td>中国大陆/欧盟初期仍不可用</td>
+        <td><span class="delta down"><span class="ico">▼</span>受限</span><span class="impact">争议：国内用户无法体验核心 AI 升级，是最大遗憾</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ④ AI 总结 -->
+<div class="sec">
+  <h2>🧠 AI 自动总结</h2>
+  <div class="g2">
+    <div class="ai-card"><h3>为什么这代这么做？</h3>
+      <p>去年 iOS 26 液态玻璃改动激进、引发争议。iOS 27 战略性转向"打磨地基"：用性能优化 + 争议修补稳住口碑，同时把 Siri 重构作为追赶 AI 竞品的核心抓手。Craig 的话："最好的系统靠抠细节。"</p></div>
+    <div class="ai-card"><h3>✅ 真正影响体验</h3>
+      <ul><li>Siri 重构 → 从语音工具到跨设备智能中枢</li>
+        <li>启动提速 30% → 高频可感知，老机型同样受益</li>
+        <li>液态玻璃可调 → 修补去年可读性争议</li></ul></div>
+    <div class="ai-card"><h3>⚠️ 噱头 / 受限项</h3>
+      <ul><li>"全平台 27 代"是版本统一，多数为渐进优化</li>
+        <li>AI 功能有每日上限，需更高 iCloud 订阅解锁</li>
+        <li>中国大陆/欧盟初期无法用核心 AI 能力</li></ul></div>
+    <div class="ai-card"><h3>📣 值得宣传的记忆点</h3>
+      <ul><li>「Siri 联手谷歌 Gemini」——AI 重构最大话题</li>
+        <li>「老机型无需换机、启动快 30%」——普惠卖点</li>
+        <li>「液态玻璃终于能调了」——回应用户呼声</li></ul></div>
+  </div>
+</div>
+
+<!-- ⑤ 与上代变化 + 图表 -->
+<div class="sec">
+  <h2>📈 与上代变化</h2>
+  <p class="sec-sub">vs iOS 26 关键维度对比，归纳升 / 降 / 平。</p>
+  <div class="g3" style="margin-bottom:20px;">
+    <div class="ch upc"><div class="hd">▲ 提升项</div><ul>
+      <li><b>Siri/AI</b>：重构，质变级跃升</li>
+      <li><b>性能</b>：启动提速 30%</li>
+      <li><b>液态玻璃</b>：透明度可调</li>
+      <li><b>儿童安全</b>：管控粒度细化</li></ul></div>
+    <div class="ch downc"><div class="hd">▼ 受限/争议项</div><ul>
+      <li><b>地区限制</b>：国内/欧盟 AI 不可用</li>
+      <li><b>AI 配额</b>：每日上限，需订阅解锁</li>
+      <li><b>创新幅度</b>：收敛，主打打磨</li></ul></div>
+    <div class="ch flatc"><div class="hd">＝ 延续优化项</div><ul>
+      <li><b>设备端搜索</b>：重建索引渐进改善</li>
+      <li><b>照片/地图</b>：功能持续小升级</li>
+      <li><b>整体设计语言</b>：延续液态玻璃</li></ul></div>
+  </div>
+  <div class="chart-box">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <h3 style="font-size:14px;margin:0;">软件维度相对得分</h3>
+      <span class="hint">💡 柱子可悬停看依据，下表常驻</span>
+    </div>
+    <p class="sec-sub" style="margin:0 0 14px;">满分 100，对标同期 Android 17（2026，谷歌 I/O 发布）。</p>
+    <div class="chart-wrap"><canvas id="chartIOS"></canvas></div>
+    <table class="basis-tbl" style="margin-top:16px;">
+      <thead><tr><th>维度</th><th>iOS 27</th><th>评分客观依据</th></tr></thead>
+      <tbody>
+        <tr><td>实用性</td><td>85</td><td>启动提速 30% + 通知/搜索优化，高频可感知</td></tr>
+        <tr><td>创新性</td><td>70</td><td>主打打磨而非突破，创新幅度收敛于上代</td></tr>
+        <tr><td>兼容性</td><td>95</td><td>支持所有 iOS 26 机型，无机型砍除；Android 阵营碎片化更新慢</td></tr>
+        <tr><td>AI 能力</td><td>82</td><td>Siri 重构 + Gemini，但地区受限；Android 17 Gemini 原生集成更早</td></tr>
+        <tr><td>隐私</td><td>92</td><td>数据单次使用不留存，端侧优先；隐私一贯强于 Android</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ⑥ SWOT -->
+<div class="sec">
+  <h2>🏆 对标 SWOT</h2>
+  <p class="sec-sub">对标同类最新手机系统：Android 17（2026 谷歌 I/O 发布，Gemini 深度集成）。已按报告生成时间交叉验证为当前主要对手。</p>
+  <div class="g2">
+    <div class="card sw s"><div class="hd">优势</div><ul>
+      <li>兼容所有 iOS 26 机型，升级率天然高</li>
+      <li>隐私端云架构，数据不留存</li>
+      <li>跨设备生态（iPhone/Mac/Vision Pro）接续无缝</li>
+      <li>系统优化扎实，启动提速 30%</li></ul></div>
+    <div class="card sw w"><div class="hd">不足</div><ul>
+      <li>核心 AI 国内/欧盟初期不可用</li>
+      <li>AI 功能每日配额，需订阅解锁</li>
+      <li>创新幅度收敛，缺乏标志性新功能</li>
+      <li>Siri 重构依赖谷歌 Gemini，自研叙事受损</li></ul></div>
+    <div class="card sw o"><div class="hd">机会</div><ul>
+      <li>借 Gemini 快速补齐 AI 短板</li>
+      <li>跨设备 AI 中枢强化生态黏性</li>
+      <li>隐私优先在 AI 时代成差异化卖点</li></ul></div>
+    <div class="card sw r"><div class="hd">风险</div><ul>
+      <li>Android 17 Gemini 集成更早更全</li>
+      <li>国内用户因 AI 缺席转向其他生态</li>
+      <li>依赖谷歌或引发"苹果 AI 不行"质疑</li></ul></div>
+  </div>
+</div>
+
+<!-- ⑦ 全量功能 -->
+<div class="sec">
+  <h2>📋 全量功能 + 兼容</h2>
+  <div class="compat-grid" style="margin-bottom:12px;">
+    <div class="compat-card ok"><div class="hd">✅ 支持机型</div>
+      <ul>
+        <li>所有能运行 iOS 26 的 iPhone 机型</li>
+        <li>iPhone 11、iPad 9 等老机型可装系统</li>
+        <li>但老机型无 AI 算力，仅获流畅度/隐私/界面优化</li>
+      </ul></div>
+    <div class="compat-card limit"><div class="hd">⚠️ 地区/功能限制</div>
+      <ul>
+        <li>中国大陆：暂不开放 Apple Intelligence 与 Siri AI 全套</li>
+        <li>欧盟：初期同样不覆盖</li>
+        <li>AI 功能有每日使用上限，更高 iCloud 订阅可提升</li>
+      </ul></div>
+  </div>
+  <details>
+    <summary>展开 iOS 27 完整功能清单</summary>
+    <table style="margin-top:12px;">
+      <tr><td>系统设计</td><td>液态玻璃透明度滑块（极致清晰↔完全着色）、应用图标 3D 液态玻璃风格</td></tr>
+      <tr><td>性能</td><td>CPU 调度器更新、应用启动最高提速 30%、多任务优化</td></tr>
+      <tr><td>Siri / AI</td><td>联合 Gemini 重构、独立对话 App、跨设备接续、视觉智能、自然语言快捷指令</td></tr>
+      <tr><td>通知</td><td>同 App 通知动态更新（快递/导航单条更新）</td></tr>
+      <tr><td>搜索</td><td>重建设备端索引，优化 App/信息/文件/邮件搜索</td></tr>
+      <tr><td>照片 / 地图</td><td>照片功能升级、地图「鸟瞰」增强、图乐园、空间重构图</td></tr>
+      <tr><td>Safari</td><td>按主题自动整理标签页、Siri 监控网页变化提醒、Safari AI 能力</td></tr>
+      <tr><td>儿童安全</td><td>Ask to Browse、Ask to Buy（13岁以下默认）、时间配额、账户随时转儿童账户</td></tr>
+      <tr><td>隐私</td><td>AI 请求数据单次使用、不留存、不共享第三方</td></tr>
+      <tr><td>上线节奏</td><td>6/8 开发者测试版 → 7月公测 → 2026 秋季正式版免费推送</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ⑧ 来源 -->
+<div class="sec">
+  <h2>📎 数据来源</h2>
+  <p style="font-size:13px;color:var(--text-secondary);">Apple Newsroom 及 WWDC26 主题演讲 · IGN中国、知乎、技术栈、MacRumors、Engadget 等媒体报道 · Android 17 对标数据取自谷歌 I/O 2026 公开信息（报告生成时间 2026年6月）· 图片为依官方资料手绘 SVG 示意图，非官方截图。</p>
+</div>
+
+<div class="nav-btns">
+  <button class="nav-btn" onclick="switchTab(0)">← 返回总览</button>
+  <button class="nav-btn" onclick="switchTab(2)">下一项：🖥️ macOS 27 →</button>
+</div>
+</div></div>
+
+<!-- ════ TAB 2 macOS 27（精简版）════ -->
+<div class="pane" id="pane2">
+<div class="wrap">
+
+<div class="sec" style="border-top:none;padding-top:36px;">
+  <div class="hero-top">
+    <div>
+      <span class="brand-tag">Apple · 电脑系统 · 精简版</span>
+      <div class="h1">macOS 27<br><span style="font-size:18px;color:var(--text-secondary);font-weight:600;">Golden Gate</span></div>
+      <p class="oneline">Siri 整合进聚焦搜索（Spotlight），新版 AI 助手登场；同时<strong>清退 Intel</strong>——macOS 27 之后 Intel Mac 不再有大版本升级，全面拥抱苹果硅闭环。</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="280" fill="#f0f0f2" rx="14"/>
+        <rect x="70" y="50" width="260" height="160" rx="12" fill="#1d1d1f"/>
+        <rect x="80" y="60" width="240" height="140" rx="6" fill="url(#gm)"/>
+        <defs><linearGradient id="gm" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d96b4a" stop-opacity="0.4"/>
+          <stop offset="1" stop-color="#4a90d9" stop-opacity="0.4"/></linearGradient></defs>
+        <rect x="120" y="100" width="160" height="26" rx="13" fill="#fff" fill-opacity="0.6"/>
+        <circle cx="138" cy="113" r="6" fill="#86868b"/>
+        <text x="210" y="117" text-anchor="middle" fill="#5a5a5c" font-size="11" font-family="sans-serif">Spotlight + Siri</text>
+        <rect x="150" y="210" width="100" height="14" rx="4" fill="#2a2a2c"/>
+        <rect x="120" y="224" width="160" height="8" rx="4" fill="#1d1d1f"/>
+        <text x="200" y="262" text-anchor="middle" fill="#86868b" font-size="11" font-family="sans-serif">示意图 · 非官方</text>
+      </svg>
+      <p class="img-caption">示意图，非官方截图</p>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card"><div class="l">发布</div><div class="v">2026.6.8</div></div>
+    <div class="card"><div class="l">代号</div><div class="v">Golden Gate</div></div>
+    <div class="card"><div class="l">上线</div><div class="v" style="font-size:13px;">测试版6月<br>正式秋季</div></div>
+    <div class="card"><div class="l">重大变化</div><div class="v" style="font-size:13px;color:var(--down);">Intel Mac<br>终止主线</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+    <h3>核心评分（软件维度）</h3><span class="hint">💡 悬停看依据</span>
+  </div>
+  <div class="stars">
+    <div class="si"><div class="dim">实用性</div>
+      <span class="rated tip-right" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>实用性 4★</b>：Siri 进 Spotlight、右键文件让 AI 引用生成，是 Mac 高频工作流的实在升级；扣 1★ 因核心增量集中在 Siri，其余为常规迭代。</span></span></div>
+    <div class="si"><div class="dim">创新性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★<span class="off">★★</span></span>
+        <span class="tip"><b>创新性 3★</b>：Spotlight + Siri 整合是体验融合而非全新范式，整体延续 macOS 既有方向，故 3★。</span></span></div>
+    <div class="si"><div class="dim">兼容性</div>
+      <span class="rated" tabindex="0"><span class="s">★★<span class="off">★★★</span></span>
+        <span class="tip"><b>兼容性 2★</b>：macOS 27 之后 Intel Mac 终止主线更新（仅安全补丁到 2029），大量 Intel Mac 用户被挡在大版本升级外，故仅 2★。</span></span></div>
+    <div class="si"><div class="dim">AI 能力</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>AI 4★</b>：Siri 整合进 Spotlight 可直接调大模型回答、引用本地文件生成，AI 工作流实用；扣 1★ 同样受地区限制。</span></span></div>
+    <div class="si"><div class="dim">隐私</div>
+      <span class="rated tip-left" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>隐私 5★</b>：与全平台一致的端云隐私架构，AI 数据不留存。隐私为苹果一贯强项，故 5★。</span></span></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>📊 功能 Diff</h2>
+  <p class="sec-sub">vs 上代 macOS 26。▲新增/升级、＝延续、▼移除/收缩。</p>
+  <table class="diff">
+    <thead><tr><th>维度</th><th>macOS 26（上代）</th><th>macOS 27 Golden Gate</th><th>变化与影响</th></tr></thead>
+    <tbody>
+      <tr class="c"><td>Siri</td><td>独立助手，能力有限</td><td>整合进 Spotlight + 大模型</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：搜索栏直接问答，Mac 工作流核心升级</span></td></tr>
+      <tr class="c"><td>AI 文件引用</td><td>无</td><td>右键文件让 AI 引用生成</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：办公/写作场景实用，本地文件直接喂 AI</span></td></tr>
+      <tr class="c"><td>Intel 支持</td><td>仍支持大版本更新</td><td>终止主线，仅安全补丁到 2029</td>
+        <td><span class="delta down"><span class="ico">▼</span>移除</span><span class="impact">争议：Intel Mac 用户被挡在大版本外，被迫换机</span></td></tr>
+      <tr><td>设计语言</td><td>液态玻璃</td><td>延续 + 细节打磨</td>
+        <td><span class="delta flat"><span class="ico">＝</span>延续</span><span class="impact">与全平台一致，渐进优化</span></td></tr>
+      <tr class="c"><td>跨设备 Siri</td><td>有限</td><td>与 iPhone/Vision Pro 接续对话</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：跨设备工作流连贯，生态黏性增强</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>🧠 AI 自动总结</h2>
+  <div class="g2">
+    <div class="ai-card"><h3>为什么这代这么做？</h3>
+      <p>macOS 27 两条主线：用 Siri + Spotlight 整合把 AI 塞进 Mac 最高频的入口；用清退 Intel 完成苹果硅生态闭环，集中资源优化自家芯片体验。代号 Golden Gate 呼应加州地标，延续 macOS 命名传统。</p></div>
+    <div class="ai-card"><h3>✅ 真正影响体验</h3>
+      <ul><li>Siri 进 Spotlight → 搜索栏直接 AI 问答</li>
+        <li>右键文件 AI 引用 → 办公写作实用</li>
+        <li>跨设备接续 → Mac↔iPhone 工作流连贯</li></ul></div>
+    <div class="ai-card"><h3>⚠️ 噱头 / 受限项</h3>
+      <ul><li>Intel Mac 终止主线，大批用户被迫观望/换机</li>
+        <li>AI 能力同样受国内/欧盟地区限制</li>
+        <li>除 Siri 外，其余多为常规迭代</li></ul></div>
+    <div class="ai-card"><h3>📣 值得宣传的记忆点</h3>
+      <ul><li>「Spotlight 里直接问 Siri」——入口级 AI 体验</li>
+        <li>「全面拥抱苹果硅」——生态闭环叙事</li>
+        <li>「Golden Gate」——50 周年纪念代号情怀</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>🏆 对标 SWOT + 兼容</h2>
+  <p class="sec-sub">对标 Windows 12（微软，AI Copilot 深度集成）。</p>
+  <div class="g2" style="margin-bottom:12px;">
+    <div class="card sw s"><div class="hd">优势</div><ul>
+      <li>Siri + Spotlight 入口级 AI 整合</li>
+      <li>苹果硅闭环，软硬协同优化深</li>
+      <li>跨设备生态接续无缝</li>
+      <li>隐私端云架构</li></ul></div>
+    <div class="card sw w"><div class="hd">不足</div><ul>
+      <li>Intel Mac 被砍，兼容性争议大</li>
+      <li>AI 受地区限制</li>
+      <li>Siri 依赖谷歌 Gemini</li></ul></div>
+    <div class="card sw o"><div class="hd">机会</div><ul>
+      <li>苹果硅性能优势放大 AI 本地体验</li>
+      <li>借 Spotlight 高频入口普及 AI</li></ul></div>
+    <div class="card sw r"><div class="hd">风险</div><ul>
+      <li>Windows 12 Copilot 集成更早更广</li>
+      <li>Intel 用户流失到 Windows 阵营</li></ul></div>
+  </div>
+  <div class="compat-grid">
+    <div class="compat-card ok"><div class="hd">✅ 支持机型</div><ul>
+      <li>全系 Apple Silicon Mac（M 系列芯片）</li>
+      <li>软硬协同，AI 功能完整可用</li></ul></div>
+    <div class="compat-card limit"><div class="hd">⚠️ 限制</div><ul>
+      <li>Intel Mac：终止大版本，仅安全补丁到 2029</li>
+      <li>AI 功能国内/欧盟初期不可用</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <details>
+    <summary>📋 展开 macOS 27 完整功能清单</summary>
+    <table style="margin-top:12px;">
+      <tr><td>代号</td><td>Golden Gate</td></tr>
+      <tr><td>Siri</td><td>整合进聚焦搜索 Spotlight，搜索栏直接输入问题调用大模型回答</td></tr>
+      <tr><td>AI 文件</td><td>右键文件让 AI 生成时引用相关文件内容</td></tr>
+      <tr><td>跨设备</td><td>与 iPhone/Mac/Vision Pro 延续同一段 Siri 对话</td></tr>
+      <tr><td>设计</td><td>延续液态玻璃，细节打磨</td></tr>
+      <tr><td>Intel 政策</td><td>macOS 27 后 Intel Mac 不再大版本升级，安全补丁维持到 2029</td></tr>
+      <tr><td>上线节奏</td><td>6/8 开发者测试版 → 7月公测 → 2026 秋季正式版</td></tr>
+    </table>
+  </details>
+</div>
+
+<div class="nav-btns">
+  <button class="nav-btn" onclick="switchTab(1)">← 上一项：📱 iOS 27</button>
+  <button class="nav-btn" onclick="switchTab(3)">下一项：🥽 visionOS 27 →</button>
+</div>
+</div></div>
+
+<!-- ════ TAB 3 visionOS 27（精简版）════ -->
+<div class="pane" id="pane3">
+<div class="wrap">
+
+<div class="sec" style="border-top:none;padding-top:36px;">
+  <div class="hero-top">
+    <div>
+      <span class="brand-tag">Apple · 头显系统 · 精简版</span>
+      <div class="h1">visionOS 27</div>
+      <p class="oneline">借 AI 与 Vision Pro 空间模型，新增<strong>「空间重构图」</strong>——可调整已拍照片的拍摄角度，并在缺失区域用 AI 生成新图像数据，让 2D 老照片变可探索的空间影像。</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="280" fill="#f0f0f2" rx="14"/>
+        <ellipse cx="200" cy="140" rx="130" ry="80" fill="#1d1d1f"/>
+        <ellipse cx="200" cy="140" rx="118" ry="70" fill="url(#gv)"/>
+        <defs><radialGradient id="gv"><stop offset="0" stop-color="#4a90d9" stop-opacity="0.5"/>
+          <stop offset="1" stop-color="#1d1d1f"/></radialGradient></defs>
+        <circle cx="150" cy="140" r="34" fill="#0a0a0a" stroke="#4a90d9" stroke-width="1.5"/>
+        <circle cx="250" cy="140" r="34" fill="#0a0a0a" stroke="#4a90d9" stroke-width="1.5"/>
+        <circle cx="150" cy="140" r="14" fill="#15151a"/>
+        <circle cx="250" cy="140" r="14" fill="#15151a"/>
+        <text x="200" y="250" text-anchor="middle" fill="#86868b" font-size="11" font-family="sans-serif">示意图 · 非官方</text>
+      </svg>
+      <p class="img-caption">示意图，非官方截图</p>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card"><div class="l">发布</div><div class="v">2026.6.8</div></div>
+    <div class="card"><div class="l">版本</div><div class="v">visionOS 27</div></div>
+    <div class="card"><div class="l">上线</div><div class="v" style="font-size:13px;">测试版6月<br>正式秋季</div></div>
+    <div class="card"><div class="l">核心新功能</div><div class="v" style="font-size:13px;">空间重构图</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+    <h3>核心评分（软件维度）</h3><span class="hint">💡 悬停看依据</span>
+  </div>
+  <div class="stars">
+    <div class="si"><div class="dim">实用性</div>
+      <span class="rated tip-right" tabindex="0"><span class="s">★★★<span class="off">★★</span></span>
+        <span class="tip"><b>实用性 3★</b>：空间重构图是有趣的 AI 影像玩法，但受众受限于 Vision Pro 持有者（基数小），日常高频度有限，故 3★。</span></span></div>
+    <div class="si"><div class="dim">创新性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>创新性 4★</b>：用 AI 补全缺失区域、改变老照片拍摄角度，是空间计算 + 生成式 AI 的有想象力结合；扣 1★ 因仍属单点功能而非系统级范式。</span></span></div>
+    <div class="si"><div class="dim">兼容性</div>
+      <span class="rated" tabindex="0"><span class="s">★★<span class="off">★★★</span></span>
+        <span class="tip"><b>兼容性 2★</b>：仅 Apple Vision Pro 可用，设备基数小、售价高，受众天然受限，故 2★。</span></span></div>
+    <div class="si"><div class="dim">AI 能力</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>AI 4★</b>：空间重构依赖 AI 生成缺失图像数据，技术含量高；扣 1★ 因功能单一，AI 应用面尚窄。</span></span></div>
+    <div class="si"><div class="dim">隐私</div>
+      <span class="rated tip-left" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>隐私 5★</b>：延续全平台端云隐私架构，空间数据处理同样遵循数据不留存原则，故 5★。</span></span></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>📊 功能 Diff</h2>
+  <p class="sec-sub">vs 上代 visionOS 26。▲新增/升级、＝延续、▼收缩。</p>
+  <table class="diff">
+    <thead><tr><th>维度</th><th>visionOS 26（上代）</th><th>visionOS 27</th><th>变化与影响</th></tr></thead>
+    <tbody>
+      <tr class="c"><td>空间照片</td><td>2D 转空间，固定视角</td><td>空间重构图：可调角度 + AI 补全</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：老照片变可探索空间影像，玩法新颖</span></td></tr>
+      <tr class="c"><td>Siri / AI</td><td>基础 Siri</td><td>重构 Siri，跨设备接续</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">与全平台一致，对话可从 iPhone 接续到头显</span></td></tr>
+      <tr><td>设计语言</td><td>空间液态玻璃</td><td>延续 + 优化</td>
+        <td><span class="delta flat"><span class="ico">＝</span>延续</span><span class="impact">渐进优化，无颠覆</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>🧠 AI 自动总结</h2>
+  <div class="g2">
+    <div class="ai-card"><h3>为什么这代这么做？</h3>
+      <p>Vision Pro 装机量仍小，visionOS 27 用「空间重构图」这种只有空间计算设备 + AI 才能做的差异化功能，强化 Vision Pro 不可替代性，给生态找杀手级用例。</p></div>
+    <div class="ai-card"><h3>✅ 真正影响体验</h3>
+      <ul><li>空间重构图 → 老照片变可探索 3D 影像</li>
+        <li>Siri 跨设备接续 → 头显延续手机对话</li>
+        <li>AI 补全 → 缺失区域智能生成</li></ul></div>
+    <div class="ai-card"><h3>⚠️ 噱头 / 受限项</h3>
+      <ul><li>仅 Vision Pro 可用，受众基数极小</li>
+        <li>空间重构图偏尝鲜，日常高频度存疑</li>
+        <li>AI 应用面仍窄，单点功能为主</li></ul></div>
+    <div class="ai-card"><h3>📣 值得宣传的记忆点</h3>
+      <ul><li>「让老照片动起来、能走进去」——直观惊艳</li>
+        <li>「AI + 空间计算」——技术叙事亮点</li>
+        <li>Vision Pro 差异化杀手级用例</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>🏆 对标 SWOT + 兼容</h2>
+  <p class="sec-sub">对标 Meta Quest 系列空间影像功能（Horizon OS）。</p>
+  <div class="g2" style="margin-bottom:12px;">
+    <div class="card sw s"><div class="hd">优势</div><ul>
+      <li>空间重构图 AI 玩法独家</li>
+      <li>与全平台生态接续无缝</li>
+      <li>苹果硅 + 空间计算性能强</li></ul></div>
+    <div class="card sw w"><div class="hd">不足</div><ul>
+      <li>仅 Vision Pro 可用，基数小</li>
+      <li>设备售价高，受众窄</li>
+      <li>杀手级应用仍稀缺</li></ul></div>
+    <div class="card sw o"><div class="hd">机会</div><ul>
+      <li>AI 空间影像或成 Vision Pro 卖点</li>
+      <li>开发者借新 API 拓展空间 AI 应用</li></ul></div>
+    <div class="card sw r"><div class="hd">风险</div><ul>
+      <li>Meta Quest 价格优势 + 生态更成熟</li>
+      <li>头显市场整体仍未爆发</li></ul></div>
+  </div>
+  <div class="compat-grid">
+    <div class="compat-card ok"><div class="hd">✅ 支持设备</div><ul>
+      <li>Apple Vision Pro</li></ul></div>
+    <div class="compat-card limit"><div class="hd">⚠️ 限制</div><ul>
+      <li>无其他设备支持，基数受限</li>
+      <li>AI 功能受地区限制</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <details>
+    <summary>📋 展开 visionOS 27 完整功能清单</summary>
+    <table style="margin-top:12px;">
+      <tr><td>空间重构图</td><td>借 AI + Vision Pro 空间模型，调整已拍照片角度，缺失区域 AI 生成新图像数据</td></tr>
+      <tr><td>Siri</td><td>重构 Siri，与 iPhone/Mac 跨设备接续对话</td></tr>
+      <tr><td>设计</td><td>延续空间液态玻璃，细节优化</td></tr>
+      <tr><td>支持设备</td><td>Apple Vision Pro</td></tr>
+      <tr><td>上线节奏</td><td>6/8 开发者测试版 → 7月公测 → 2026 秋季正式版</td></tr>
+    </table>
+  </details>
+</div>
+
+<div class="nav-btns">
+  <button class="nav-btn" onclick="switchTab(2)">← 上一项：🖥️ macOS 27</button>
+  <button class="nav-btn" onclick="switchTab(4)">下一项：🧠 AI & Siri →</button>
+</div>
+</div></div>
+
+<!-- ════ TAB 4 AI & Siri（精简版）════ -->
+<div class="pane" id="pane4">
+<div class="wrap">
+
+<div class="sec" style="border-top:none;padding-top:36px;">
+  <div class="hero-top">
+    <div>
+      <span class="brand-tag">Apple · AI 平台 · 精简版</span>
+      <div class="h1">Apple Intelligence<br>+ 重构 Siri</div>
+      <p class="oneline">本届 WWDC 真正的主菜：苹果<strong>联手宿敌谷歌</strong>，基于 Gemini 定制 Apple Foundation Models，端侧 + 私有云双架构，Siri 从语音工具升级为跨设备智能中枢。</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="280" fill="#f0f0f2" rx="14"/>
+        <circle cx="200" cy="140" r="70" fill="none" stroke="#4a90d9" stroke-width="2" stroke-opacity="0.5"/>
+        <circle cx="200" cy="140" r="50" fill="none" stroke="#b06ab3" stroke-width="2" stroke-opacity="0.5"/>
+        <circle cx="200" cy="140" r="30" fill="url(#ga)"/>
+        <defs><radialGradient id="ga"><stop offset="0" stop-color="#4a90d9"/><stop offset="1" stop-color="#b06ab3"/></radialGradient></defs>
+        <circle cx="200" cy="70" r="8" fill="#1d1d1f"/>
+        <circle cx="270" cy="140" r="8" fill="#1d1d1f"/>
+        <circle cx="200" cy="210" r="8" fill="#1d1d1f"/>
+        <circle cx="130" cy="140" r="8" fill="#1d1d1f"/>
+        <text x="200" y="145" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">Siri</text>
+        <text x="200" y="262" text-anchor="middle" fill="#86868b" font-size="11" font-family="sans-serif">端云双架构示意 · 非官方</text>
+      </svg>
+      <p class="img-caption">示意图，非官方</p>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card"><div class="l">发布</div><div class="v">2026.6.8</div></div>
+    <div class="card"><div class="l">底层模型</div><div class="v" style="font-size:14px;">定制 Gemini<br>+ 苹果基础模型</div></div>
+    <div class="card"><div class="l">架构</div><div class="v" style="font-size:13px;">端侧 + 私有云</div></div>
+    <div class="card"><div class="l">地区</div><div class="v" style="font-size:13px;color:var(--down);">国内/欧盟<br>初期不可用</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+    <h3>核心评分（软件维度）</h3><span class="hint">💡 悬停看依据</span>
+  </div>
+  <div class="stars">
+    <div class="si"><div class="dim">实用性</div>
+      <span class="rated tip-right" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>实用性 4★</b>：跨 App 复杂任务（写消息、整理相册、批量处理文件）、跨设备接续对话，实用度高；扣 1★ 因有每日配额且地区受限。</span></span></div>
+    <div class="si"><div class="dim">创新性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>创新性 4★</b>：苹果放下自研执念联手谷歌 Gemini，是战略级转向；端云双架构 + 隐私设计有新意；扣 1★ 因底层依赖外部模型，自研含量降低。</span></span></div>
+    <div class="si"><div class="dim">兼容性</div>
+      <span class="rated" tabindex="0"><span class="s">★★★<span class="off">★★</span></span>
+        <span class="tip"><b>兼容性 3★</b>：跨 iPhone/Mac/Vision Pro 全平台可用，但老机型无 AI 算力、国内欧盟不可用，整体覆盖打折，故 3★。</span></span></div>
+    <div class="si"><div class="dim">AI 能力</div>
+      <span class="rated" tabindex="0"><span class="s">★★★★<span class="off">★</span></span>
+        <span class="tip"><b>AI 能力 4★</b>：基于 Gemini 的强大云端算力 + 苹果端侧模型，长上下文多轮对话；扣 1★ 因实际表现待评测，且强调"增强生态"而非生成能力打榜。</span></span></div>
+    <div class="si"><div class="dim">隐私</div>
+      <span class="rated tip-left" tabindex="0"><span class="s">★★★★★</span>
+        <span class="tip"><b>隐私 5★</b>：AI 请求数据仅单次使用、完成即删、不共享第三方，端侧优先、私有云兜底。隐私是苹果对抗谷歌/OpenAI 的核心差异点，故 5★。</span></span></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>📊 功能 Diff</h2>
+  <p class="sec-sub">vs 上代 Apple Intelligence（iOS 26 时期）。▲新增/升级、＝延续、▼收缩。</p>
+  <table class="diff">
+    <thead><tr><th>维度</th><th>上代 Apple Intelligence</th><th>本代（WWDC26）</th><th>变化与影响</th></tr></thead>
+    <tbody>
+      <tr class="c"><td>底层模型</td><td>纯苹果自研，能力受限</td><td>联合谷歌定制 Gemini</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：补齐 AI 短板，云端推理能力大增</span></td></tr>
+      <tr class="c"><td>Siri 形态</td><td>语音工具</td><td>独立对话 App + 智能中枢</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">真影响：类 ChatGPT 对话窗，告别弹窗交互</span></td></tr>
+      <tr class="c"><td>跨设备</td><td>有限</td><td>iPhone/Mac/Vision Pro 接续对话</td>
+        <td><span class="delta up"><span class="ico">▲</span>新增</span><span class="impact">真影响：iCloud 同步对话，无缝接力</span></td></tr>
+      <tr class="c"><td>复杂任务</td><td>简单指令</td><td>跨 App 长上下文多轮</td>
+        <td><span class="delta up"><span class="ico">▲</span>升级</span><span class="impact">写消息/整理相册/批量文件，实用度跃升</span></td></tr>
+      <tr class="c"><td>使用限制</td><td>较宽松</td><td>每日配额，需订阅提升</td>
+        <td><span class="delta down"><span class="ico">▼</span>收缩</span><span class="impact">争议：带宽限制下设每日上限，重度用户受影响</span></td></tr>
+      <tr class="c"><td>地区可用</td><td>部分受限</td><td>国内/欧盟初期不可用</td>
+        <td><span class="delta down"><span class="ico">▼</span>受限</span><span class="impact">争议：国内用户无法体验，是最大遗憾</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>🧠 AI 自动总结</h2>
+  <div class="g2">
+    <div class="ai-card"><h3>为什么联手谷歌？</h3>
+      <p>苹果自研大模型进度落后于 OpenAI/谷歌，Siri 多年被诟病。这次放下执念、引入 Gemini 云端算力补齐短板，同时死守隐私本地计算护城河——用"谷歌的模型能力 + 苹果的隐私架构"组合追赶竞品。</p></div>
+    <div class="ai-card"><h3>✅ 真正影响体验</h3>
+      <ul><li>Gemini 加持 → Siri 终于"能用"了</li>
+        <li>跨设备接续 → 对话在全设备无缝接力</li>
+        <li>跨 App 复杂任务 → 真正的智能助理</li></ul></div>
+    <div class="ai-card"><h3>⚠️ 噱头 / 受限项</h3>
+      <ul><li>底层依赖谷歌，自研叙事受损</li>
+        <li>每日配额 + 需更高 iCloud 订阅</li>
+        <li>国内/欧盟初期完全不可用</li></ul></div>
+    <div class="ai-card"><h3>📣 值得宣传的记忆点</h3>
+      <ul><li>「苹果联手宿敌谷歌」——震动硅谷的话题</li>
+        <li>「隐私优先的 AI」——对抗谷歌/OpenAI 差异点</li>
+        <li>「Siri 跨设备智能中枢」——生态叙事</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>🏆 对标 SWOT + 兼容</h2>
+  <p class="sec-sub">对标 Google Gemini（深度集成 Android）、Microsoft Copilot。</p>
+  <div class="g2" style="margin-bottom:12px;">
+    <div class="card sw s"><div class="hd">优势</div><ul>
+      <li>Gemini 能力 + 苹果隐私架构组合独特</li>
+      <li>跨设备生态接续无缝</li>
+      <li>端云双架构，隐私优先</li>
+      <li>深度整合系统级体验</li></ul></div>
+    <div class="card sw w"><div class="hd">不足</div><ul>
+      <li>底层依赖谷歌，自研含量低</li>
+      <li>国内/欧盟初期不可用</li>
+      <li>每日配额限制重度使用</li>
+      <li>实际能力待评测验证</li></ul></div>
+    <div class="card sw o"><div class="hd">机会</div><ul>
+      <li>借 Gemini 快速追平 AI 差距</li>
+      <li>隐私在 AI 时代成差异化卖点</li>
+      <li>苹果庞大装机量放大 AI 触达</li></ul></div>
+    <div class="card sw r"><div class="hd">风险</div><ul>
+      <li>Gemini 原生在 Android 集成更深</li>
+      <li>依赖谷歌引发战略自主质疑</li>
+      <li>国内用户转向本土 AI 生态</li></ul></div>
+  </div>
+  <div class="compat-grid">
+    <div class="compat-card ok"><div class="hd">✅ 支持</div><ul>
+      <li>支持 AI 算力的 iPhone/iPad/Mac/Vision Pro</li>
+      <li>跨设备接续对话</li></ul></div>
+    <div class="compat-card limit"><div class="hd">⚠️ 限制</div><ul>
+      <li>中国大陆、欧盟初期不可用</li>
+      <li>老机型无 AI 算力</li>
+      <li>每日配额，需更高 iCloud 订阅提升</li></ul></div>
+  </div>
+</div>
+
+<div class="sec">
+  <details>
+    <summary>📋 展开 Apple Intelligence + Siri 完整能力清单</summary>
+    <table style="margin-top:12px;">
+      <tr><td>底层模型</td><td>联合谷歌定制基于 Gemini 的 Apple Foundation Models</td></tr>
+      <tr><td>架构</td><td>端侧模型（高频低延迟隐私任务）+ 私有云计算（复杂推理）+ 系统调度器</td></tr>
+      <tr><td>Siri 形态</td><td>独立 App 界面，类 ChatGPT 对话窗，告别弹窗；Mac 集成 Spotlight</td></tr>
+      <tr><td>能力</td><td>长上下文多轮对话、跨 App 复杂任务（写消息/整理相册/批量文件）</td></tr>
+      <tr><td>跨设备</td><td>iCloud 同步对话，iPhone/Mac/Watch/Vision Pro 无缝接续</td></tr>
+      <tr><td>视觉智能</td><td>向 Siri 展示图片并提问，扩展到更多设备</td></tr>
+      <tr><td>快捷指令</td><td>自然语言描述自动化流程，AI 生成对应操作</td></tr>
+      <tr><td>隐私</td><td>数据单次使用、完成即删、不共享第三方</td></tr>
+      <tr><td>限制</td><td>每日使用上限（带宽限制），更高 iCloud 订阅可提升；国内/欧盟初期不可用</td></tr>
+    </table>
+  </details>
+</div>
+
+<div class="nav-btns">
+  <button class="nav-btn" onclick="switchTab(3)">← 上一项：🥽 visionOS 27</button>
+  <button class="nav-btn" onclick="switchTab(0)">回到总览 📋</button>
+</div>
+</div>
+
+<div class="wrap">
+<footer>
+  <p><strong>📎 数据与图片来源</strong></p>
+  <p>· Apple Newsroom 及 WWDC26 主题演讲（2026.6.8）</p>
+  <p>· IGN中国、知乎、技术栈、搜狐、MacRumors、Engadget 等媒体报道</p>
+  <p>· 对标数据（Android 17 / Windows 12 / Gemini / Copilot / Meta Quest）取自各家公开信息，基准时间为报告生成时 2026 年 6 月。</p>
+  <p style="margin-top:8px;">本报告为<strong>软件发布会模式</strong>：以功能 Diff、兼容机型、上线节奏替代硬件的参数/价格/配色。所有图形为依官方资料手绘 SVG 示意图，非官方截图。评分为本报告主观评估，每项附客观依据（悬停查看）。报告生成于 2026-06-24（event-research skill v1.4）。</p>
+  <p style="color:#b0b0b3;margin-top:4px;">本报告为调研整理，客观陈述公开信息，不构成购买/升级建议。</p>
+</footer>
+</div>
+</div>
+
+<script>
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-tab="'+n+'"]').classList.add('active');
+  document.getElementById('pane'+n).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===1 && !window._c1){ initChart(); window._c1=true; }
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(+b.dataset.tab)));
+
+Chart.defaults.color='#86868b';
+Chart.defaults.borderColor='#e5e5e5';
+Chart.defaults.font.family="-apple-system,'SF Pro Display','PingFang SC',sans-serif";
+
+const basis={
+  '实用性':'启动提速 30% + 通知/搜索优化，高频可感知',
+  '创新性':'主打打磨而非突破，创新幅度收敛于上代',
+  '兼容性':'支持所有 iOS 26 机型，无机型砍除',
+  'AI 能力':'Siri 重构 + Gemini，但地区受限',
+  '隐私':'数据单次使用不留存，端侧优先'
+};
+
+function initChart(){
+  new Chart(document.getElementById('chartIOS'),{
+    type:'bar',
+    data:{
+      labels:['实用性','创新性','兼容性','AI 能力','隐私'],
+      datasets:[
+        {label:'iOS 27',data:[85,70,95,82,92],backgroundColor:'#1d1d1f',borderRadius:4,barPercentage:0.62,categoryPercentage:0.7},
+        {label:'Android 17（对标）',data:[83,80,75,88,72],backgroundColor:'#d2d2d7',borderRadius:4,barPercentage:0.62,categoryPercentage:0.7}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      scales:{x:{min:0,max:100,grid:{color:'#e5e5e5'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:11}}}},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:12,font:{size:12},padding:14}},
+        tooltip:{callbacks:{afterLabel:(ctx)=>ctx.datasetIndex===0&&basis[ctx.label]?'依据：'+basis[ctx.label]:''}}
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
